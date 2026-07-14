@@ -1,0 +1,3 @@
+# uploads directory — local image storage
+# Files uploaded via the admin panel are stored here.
+# This directory is served as static files at /uploads

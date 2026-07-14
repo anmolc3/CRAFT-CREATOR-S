@@ -1,0 +1,491 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ============================================================
+   GLOBAL STYLES — Sikhar Photography
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Google Fonts ───────────────────────────────────────── */
+
+/* ─── Base Styles ────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  :root {
+    --color-primary: #111111;
+    --color-secondary: #1F1F1F;
+    --color-accent: #D4AF37;
+    --color-background: #FAFAFA;
+    --color-text: #333333;
+    --color-white: #FFFFFF;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --transition-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  html {
+    @apply scroll-smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-primary font-body antialiased;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+    font-feature-settings: 'kern' 1;
+  }
+
+  img {
+    @apply max-w-full;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* Remove default button styles */
+  button {
+    @apply cursor-pointer;
+  }
+
+  /* Smooth focus ring */
+  :focus-visible {
+    @apply outline-2 outline-accent outline-offset-2;
+  }
+
+  /* Selection color */
+  ::selection {
+    @apply bg-accent/20 text-primary;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-primary-50;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-accent;
+  }
+}
+
+/* ─── Component Styles ───────────────────────────────────── */
+@layer components {
+  /* Luxury Button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-8 py-3.5 
+           bg-primary text-white font-body font-medium text-sm tracking-widest uppercase
+           transition-all duration-300 hover:bg-accent hover:text-primary
+           focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-8 py-3.5
+           border border-primary text-primary font-body font-medium text-sm tracking-widest uppercase
+           transition-all duration-300 hover:bg-primary hover:text-white
+           focus-visible:outline-2 focus-visible:outline-primary;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 px-8 py-3.5
+           bg-accent text-primary font-body font-medium text-sm tracking-widest uppercase
+           transition-all duration-300 hover:shadow-gold hover:scale-[1.02]
+           focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
+           text-primary font-body font-medium text-sm tracking-wide
+           transition-all duration-300 hover:text-accent
+           focus-visible:outline-2 focus-visible:outline-primary;
+  }
+
+  /* Section heading with decorative line */
+  .section-heading {
+    @apply relative font-display text-display-md text-primary;
+  }
+
+  .section-heading::after {
+    content: '';
+    @apply block w-12 h-0.5 bg-accent mt-4;
+  }
+
+  .section-heading.center::after {
+    @apply mx-auto;
+  }
+
+  /* Gold accent text */
+  .text-gold {
+    @apply text-accent;
+  }
+
+  /* Luxury card */
+  .luxury-card {
+    @apply bg-white rounded-none shadow-card transition-all duration-500
+           hover:shadow-card-hover hover:-translate-y-1;
+  }
+
+  /* Image overlay for protection */
+  .image-protected {
+    @apply relative overflow-hidden;
+  }
+
+  .image-protected::after {
+    content: '';
+    @apply absolute inset-0 z-10;
+    pointer-events: none;
+  }
+
+  /* Glass morphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-dark {
+    background: rgba(17, 17, 17, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Skeleton loader */
+  .skeleton {
+    @apply bg-primary-100 relative overflow-hidden;
+  }
+
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Badge variants */
+  .badge-limited {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 text-xs font-body font-medium
+           tracking-widest uppercase bg-accent text-primary;
+  }
+
+  .badge-featured {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 text-xs font-body font-medium
+           tracking-widest uppercase bg-primary text-white;
+  }
+
+  /* Navigation link */
+  .nav-link {
+    @apply text-sm font-body font-medium tracking-widest uppercase text-primary
+           transition-colors duration-200 hover:text-accent relative;
+  }
+
+  .nav-link.active {
+    @apply text-accent;
+  }
+
+  /* Form elements */
+  .form-input {
+    @apply w-full px-4 py-3 border border-primary-200 bg-white text-primary font-body text-sm
+           transition-all duration-200 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20;
+  }
+
+  .form-label {
+    @apply block text-xs font-body font-medium tracking-widest uppercase text-primary-600 mb-2;
+  }
+
+  /* Masonry grid */
+  .masonry-grid {
+    columns: 3;
+    column-gap: 1rem;
+  }
+
+  .masonry-item {
+    @apply break-inside-avoid mb-4;
+  }
+
+  @media (max-width: 1024px) {
+    .masonry-grid { columns: 2; }
+  }
+
+  @media (max-width: 640px) {
+    .masonry-grid { columns: 1; }
+  }
+
+  /* Hero overlay gradient */
+  .hero-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.1) 40%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
+  }
+
+  /* Admin sidebar link */
+  .admin-nav-link {
+    @apply flex items-center gap-3 px-4 py-3 text-sm font-body font-medium
+           text-gray-400 transition-all duration-200 hover:text-white hover:bg-white/5
+           rounded-lg mx-2;
+  }
+
+  .admin-nav-link.active {
+    @apply text-white bg-white/10;
+  }
+
+  .photo-card {
+    @apply relative overflow-hidden cursor-pointer;
+  }
+
+  .photo-card-overlay {
+    @apply absolute inset-0 bg-primary/0 group-hover:bg-primary/40 
+           transition-all duration-500 flex items-end;
+  }
+
+  /* Inquiry builder steps */
+  .inquiry-option {
+    @apply flex-1 text-center px-4 py-3 border border-primary-200 text-sm font-body
+           cursor-pointer transition-all duration-200 hover:border-accent hover:text-accent;
+  }
+
+  .inquiry-option.selected {
+    @apply border-accent bg-accent text-primary font-medium;
+  }
+
+  /* Price display */
+  .price-display {
+    @apply font-display text-3xl text-primary;
+  }
+
+  /* Container */
+  .container-luxury {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* ─── Utilities ──────────────────────────────────────────── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-select {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+  }
+
+  .no-drag {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+
+  /* Prevent right-click context menu effect */
+  .protect-image {
+    pointer-events: none;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #D4AF37, #b8960a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Letter spacing variations */
+  .tracking-luxury {
+    letter-spacing: 0.25em;
+  }
+
+  .tracking-wide-xl {
+    letter-spacing: 0.3em;
+  }
+
+  /* Aspect ratios */
+  .aspect-photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  .aspect-portrait {
+    aspect-ratio: 3 / 4;
+  }
+
+  /* Blur on hover reveal effect */
+  .reveal-on-hover {
+    @apply opacity-0 translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0;
+  }
+}
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ─── Print styles ───────────────────────────────────────── */
+@media print {
+  .no-print { display: none !important; }
+}
+
+/* ─── WhatsApp Button Loop Animation ─────────────────────── */
+.whatsapp-loop-wrapper {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.whatsapp-mountain {
+  position: absolute;
+  right: -500px;
+  bottom: -20px;
+  width: 2px;
+  height: 2px;
+  box-shadow: 
+    0 0 0 20px rgba(255, 255, 255, 0.1),
+    25px 20px 0 28px rgba(255, 255, 255, 0.1),
+    40px 40px 0 20px rgba(255, 255, 255, 0.1),
+    100px 100px 0 20px rgba(255, 255, 255, 0.1),
+    120px 130px 0 20px rgba(255, 255, 255, 0.1);
+  transform: rotate(130deg);
+  animation: whatsapp-mtn 25s linear infinite;
+}
+
+.whatsapp-hill {
+  position: absolute;
+  right: -600px;
+  bottom: -35px;
+  width: 250px;
+  border-radius: 50%;
+  height: 10px;
+  box-shadow: 
+    0 0 0 25px rgba(255, 255, 255, 0.12),
+    -10px 0 0 10px rgba(255, 255, 255, 0.12),
+    -45px 0 0 25px rgba(255, 255, 255, 0.12),
+    125px 0 0 25px rgba(255, 255, 255, 0.12),
+    145px 0 0 25px rgba(255, 255, 255, 0.12),
+    310px 0 0 25px rgba(255, 255, 255, 0.12);
+  animation: whatsapp-hill 6s 2s linear infinite;
+}
+
+.whatsapp-tree {
+  position: absolute;
+  height: 32px; 
+  width: 15px;
+  bottom: 0;
+  background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/tree.svg) no-repeat;
+  background-size: contain;
+  opacity: 0.15;
+}
+.whatsapp-tree-1 { animation: whatsapp-tree 5s 0.000s linear infinite; }
+.whatsapp-tree-2 { animation: whatsapp-tree2 3.5s 0.150s linear infinite; }
+.whatsapp-tree-3 { animation: whatsapp-tree3 12s 0.050s linear infinite; }
+
+.whatsapp-rock {
+  bottom: 0px;
+  height: 3px; 
+  width: 3px;
+  border-radius: 50%;
+  position: absolute;
+  background: rgba(255, 255, 255, 0.25);
+  animation: whatsapp-rock 6s -0.530s linear infinite;
+}
+
+.whatsapp-truck, .whatsapp-wheels {
+  transition: all ease;
+  width: 40px;
+  margin-right: -20px;
+  bottom: 2px;
+  right: 50%;
+  position: absolute;
+  pointer-events: none;
+}
+.whatsapp-truck {
+  background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/truck.svg) no-repeat;
+  background-size: contain;
+  height: 28px;
+  animation: whatsapp-truck 4s 0.080s ease infinite;
+  filter: brightness(0) invert(1);
+  opacity: 0.35;
+}
+.whatsapp-wheels {
+  background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/wheels.svg) no-repeat;
+  background-size: contain;
+  height: 7px;
+  animation: whatsapp-truck 4s 0.001s ease infinite;
+  filter: brightness(0) invert(1);
+  opacity: 0.35;
+}
+
+@keyframes whatsapp-tree {
+  0%   { transform: translate(500px); }
+  100% { transform: translate(-50px); }
+}
+@keyframes whatsapp-tree2 {
+  0%   { transform: translate(250px); }
+  100% { transform: translate(-50px); }
+}
+@keyframes whatsapp-tree3 {
+  0%   { transform: translate(1000px); }
+  100% { transform: translate(-50px); }
+}
+
+@keyframes whatsapp-rock {
+  0%   { right: -100px; }
+  100% { right: 800px; }
+}
+@keyframes whatsapp-truck {
+  0%   { }
+  6%   { transform: translateY(0px); }
+  7%   { transform: translateY(-2px); }
+  9%   { transform: translateY(0px); }
+  10%   { transform: translateY(-0.5px); }
+  11%   { transform: translateY(0px); }
+  100%   { }
+}
+@keyframes whatsapp-mtn {
+  100% {
+    transform: translateX(-1200px) rotate(130deg);
+  }
+}
+@keyframes whatsapp-hill {
+  100% {
+    transform: translateX(-1000px);
+  }
+}
+

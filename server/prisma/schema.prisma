@@ -1,0 +1,333 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Admin ───────────────────────────────────────────────────────────────────
+model Admin {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blogs Blog[]
+
+  @@map("admins")
+}
+
+// ─── Category ─────────────────────────────────────────────────────────────────
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  photos Photo[]
+
+  @@map("categories")
+}
+
+// ─── Photo ────────────────────────────────────────────────────────────────────
+model Photo {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  description    String?
+  story          String?
+  imageUrl       String
+  galleryImages  String[] // Additional showcase images
+  cloudinaryId   String?
+  width          Int?
+  height         Int?
+  resolution     String?  // e.g. "50 MP"
+  orientation    String   @default("landscape") // landscape | portrait | square
+  camera         String?
+  lens           String?
+  iso            String?
+  aperture       String?
+  shutterSpeed   String?
+  location       String?
+  dateTaken      DateTime?
+  tags           String[]
+  palette        String[] // dominant colour hex codes for related matching
+  featured       Boolean  @default(false)
+  bestSeller     Boolean  @default(false)
+  limitedEdition Boolean  @default(false)
+  editionSize    Int      @default(100)  // total prints in edition
+  editionSold    Int      @default(0)    // prints already sold
+  views          Int      @default(0)
+  status         String   @default("published") // published | draft
+  basePrice      Int      @default(4500) // in INR
+  categoryId     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  collections CollectionPhoto[]
+  analytics   Analytics[]
+
+  @@map("photos")
+}
+
+// ─── Collection ───────────────────────────────────────────────────────────────
+model Collection {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  photos CollectionPhoto[]
+
+  @@map("collections")
+}
+
+// ─── CollectionPhoto (Join Table) ─────────────────────────────────────────────
+model CollectionPhoto {
+  collectionId String
+  photoId      String
+  order        Int @default(0)
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  photo      Photo      @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, photoId])
+  @@map("collection_photos")
+}
+
+// ─── Frame ────────────────────────────────────────────────────────────────────
+model Frame {
+  id       String @id @default(cuid())
+  name     String // Black, White, Oak, Walnut, Gold
+  color    String
+  material String // Wood | Metal
+  price    Int    @default(1500) // Additional cost in INR
+
+  @@map("frames")
+}
+
+// ─── PrintSize ────────────────────────────────────────────────────────────────
+model PrintSize {
+  id        String  @id @default(cuid())
+  label     String  // "8×10", "12×18", "16×24", "24×36", "Custom"
+  width     Int     // inches
+  height    Int     // inches
+  basePrice Int     @default(3500) // in INR
+  isCustom  Boolean @default(false)
+  order     Int     @default(0)
+
+  @@map("print_sizes")
+}
+
+// ─── PrintFinish ──────────────────────────────────────────────────────────────
+model PrintFinish {
+  id    String @id @default(cuid())
+  name  String @unique // Matte, Glossy, Fine Art Paper, Canvas
+  price Int    @default(0) // Additional cost in INR
+  order Int    @default(0)
+
+  @@map("print_finishes")
+}
+
+// ─── GlassOption ─────────────────────────────────────────────────────────────
+model GlassOption {
+  id    String @id @default(cuid())
+  name  String @unique // Standard Glass, Anti-Glare Glass
+  price Int    @default(0)
+  order Int    @default(0)
+
+  @@map("glass_options")
+}
+
+// ─── MountOption ─────────────────────────────────────────────────────────────
+model MountOption {
+  id    String @id @default(cuid())
+  name  String @unique // With Mount, Without Mount
+  price Int    @default(0)
+  order Int    @default(0)
+
+  @@map("mount_options")
+}
+
+// ─── Testimonial ──────────────────────────────────────────────────────────────
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  title     String?
+  quote     String
+  rating    Int      @default(5)
+  photoUrl  String?
+  createdAt DateTime @default(now())
+
+  @@map("testimonials")
+}
+
+// ─── Blog ─────────────────────────────────────────────────────────────────────
+model Blog {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?
+  content     String   @db.Text
+  coverImage  String?
+  tags        String[]
+  published   Boolean  @default(false)
+  authorId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author Admin? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@map("blogs")
+}
+
+// ─── Newsletter ───────────────────────────────────────────────────────────────
+model Newsletter {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+
+  @@map("newsletters")
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+model Settings {
+  id                String  @id @default(cuid())
+  photographerName  String  @default("Sikhar")
+  whatsappNumber    String  @default("919876543210")
+  phone             String  @default("+91 98765 43210")
+  email             String  @default("hello@sikhar.photography")
+  address           String  @default("Mumbai, Maharashtra, India")
+  instagramUrl      String  @default("https://instagram.com/sikhar.photography")
+  facebookUrl       String  @default("https://facebook.com/sikhar.photography")
+  youtubeUrl        String  @default("https://youtube.com/@sikhar.photography")
+  heroTitle         String  @default("Capturing Light, Crafting Moments")
+  heroSubtitle      String  @default("Fine art prints for discerning collectors")
+  heroImage         String?
+  aboutText         String  @default("Sikhar is a fine art photographer based in Mumbai, specializing in landscape, wildlife, and travel photography.")
+  seoTitle          String  @default("Sikhar | Fine Art Photography")
+  seoDescription    String  @default("Luxury fine art prints by Sikhar. Landscape, wildlife, travel, and nature photography. Custom framed prints ordered via WhatsApp.")
+
+  @@map("settings")
+}
+
+// ─── Analytics ────────────────────────────────────────────────────────────────
+model Analytics {
+  id        String   @id @default(cuid())
+  event     String   // "view" | "whatsapp_click" | "favorite"
+  photoId   String?
+  meta      String?  // JSON string for additional data
+  createdAt DateTime @default(now())
+
+  photo Photo? @relation(fields: [photoId], references: [id], onDelete: SetNull)
+
+  @@map("analytics")
+}
+
+
+// ============================================================================
+// PHASE 2: SERVICES, BOOKINGS, CLIENT GALLERIES
+// ============================================================================
+
+// ─── Service ────────────────────────────────────────────────────────────────
+model Service {
+  id            String   @id @default(cuid())
+  title         String   @unique
+  slug          String   @unique
+  description   String   @db.Text
+  overview      String?  @db.Text
+  includes      Json?    // Array of strings (features included)
+  price         Int      @default(0) // Starting price
+  duration      String?
+  heroImage     String?
+  gallery       Json?    // Array of image URLs
+  faqs          Json?    // Array of { question, answer }
+  featured      Boolean  @default(false)
+  status        String   @default("active") // active | inactive
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  bookings      Booking[]
+
+  @@map("services")
+}
+
+// ─── Booking ────────────────────────────────────────────────────────────────
+model Booking {
+  id               String   @id @default(cuid())
+  name             String
+  email            String
+  phone            String
+  whatsapp         String?
+  eventType        String?
+  preferredDate    DateTime?
+  alternateDate    DateTime?
+  time             String?
+  location         String?
+  guests           Int?
+  budget           Int?
+  requirements     String?  @db.Text
+  referenceImages  Json?    // Array of image URLs
+  status           String   @default("pending") // pending | confirmed | completed | cancelled
+  notes            String?  @db.Text
+  serviceId        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@map("bookings")
+}
+
+// ─── Client Gallery ─────────────────────────────────────────────────────────
+model ClientGallery {
+  id               String   @id @default(cuid())
+  title            String
+  slug             String   @unique
+  clientName       String
+  eventName        String?
+  eventDate        DateTime?
+  description      String?  @db.Text
+  coverImage       String?
+  password         String?  // Can be plain text for simple client sharing
+  status           String   @default("active") // active | archived
+  expiryDate       DateTime?
+  downloadsEnabled Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  images           GalleryImage[]
+
+  @@map("client_galleries")
+}
+
+// ─── Gallery Image ──────────────────────────────────────────────────────────
+model GalleryImage {
+  id             String   @id @default(cuid())
+  galleryId      String
+  imageUrl       String
+  cloudinaryId   String?
+  watermarkUrl   String?
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  gallery ClientGallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_images")
+}
