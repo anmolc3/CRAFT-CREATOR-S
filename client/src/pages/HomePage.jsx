@@ -439,7 +439,15 @@ const HomePage = () => {
           photoService.getAll({ limit: 12, status: 'published' }),
           collectionService.getAll(),
         ]);
-        setPhotos(photoRes.data || []);
+        // Deduplicate by id in case the API returns duplicates
+        const rawPhotos = photoRes.data || [];
+        const seen = new Set();
+        const uniquePhotos = rawPhotos.filter(p => {
+          if (seen.has(p.id)) return false;
+          seen.add(p.id);
+          return true;
+        });
+        setPhotos(uniquePhotos);
         setCollections(collectionRes.data || []);
       } catch (e) {
         console.error(e);

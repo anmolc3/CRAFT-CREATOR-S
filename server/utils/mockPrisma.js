@@ -507,7 +507,29 @@ const makeMockModel = (tableName) => {
     db[tableName].push(...newItems);
     return { count: newItems.length };
   };
-  
+
+  const upsert = async (args = {}) => {
+    const existing = await findFirst({ where: args.where });
+    if (existing) {
+      return update({ where: args.where, data: args.update });
+    }
+    return create({ data: { ...args.where, ...args.create } });
+  };
+
+  // groupBy — minimal mock: group by a single field and count
+  const groupBy = async (args = {}) => {
+    const records = await findMany({ where: args.where });
+    const groupField = args.by && args.by[0];
+    if (!groupField) return [];
+    const groups = {};
+    records.forEach(item => {
+      const key = item[groupField];
+      if (!groups[key]) groups[key] = { [groupField]: key, _count: { _all: 0 } };
+      groups[key]._count._all += 1;
+    });
+    return Object.values(groups);
+  };
+
   return {
     findMany,
     findUnique,
@@ -517,7 +539,9 @@ const makeMockModel = (tableName) => {
     update,
     delete: deleteRecord,
     deleteMany,
-    createMany
+    createMany,
+    upsert,
+    groupBy,
   };
 };
 

@@ -142,7 +142,6 @@ const MainLayout = () => {
             <ul className="space-y-4">
               <li><Link to="/services" className="text-sm text-white/80 hover:text-accent transition-colors">Services</Link></li>
               <li><Link to="/book" className="text-sm text-white/80 hover:text-accent transition-colors">Inquire & Book</Link></li>
-              <li><Link to="/admin/login" className="text-sm text-white/40 hover:text-white transition-colors">Client/Admin Portal</Link></li>
             </ul>
           </div>
           
