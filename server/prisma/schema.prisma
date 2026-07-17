@@ -1,5 +1,7 @@
-// This is your Prisma schema file
-// Learn more: https://pris.ly/d/prisma-schema
+// ============================================================================
+// CRAFT CREATOR'S — Custom Photo Framing Studio
+// Prisma Schema
+// ============================================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -19,13 +21,11 @@ model Admin {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  blogs Blog[]
-
   @@map("admins")
 }
 
-// ─── Category ─────────────────────────────────────────────────────────────────
-model Category {
+// ─── Frame Category ───────────────────────────────────────────────────────────
+model FrameCategory {
   id          String   @id @default(cuid())
   name        String   @unique
   slug        String   @unique
@@ -35,166 +35,181 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  photos Photo[]
+  frames FrameDesign[]
 
-  @@map("categories")
+  @@map("frame_categories")
 }
 
-// ─── Photo ────────────────────────────────────────────────────────────────────
-model Photo {
-  id             String   @id @default(cuid())
-  title          String
-  slug           String   @unique
-  description    String?
-  story          String?
-  imageUrl       String
-  galleryImages  String[] // Additional showcase images
-  cloudinaryId   String?
-  width          Int?
-  height         Int?
-  resolution     String?  // e.g. "50 MP"
-  orientation    String   @default("landscape") // landscape | portrait | square
-  camera         String?
-  lens           String?
-  iso            String?
-  aperture       String?
-  shutterSpeed   String?
-  location       String?
-  dateTaken      DateTime?
-  tags           String[]
-  palette        String[] // dominant colour hex codes for related matching
-  featured       Boolean  @default(false)
-  bestSeller     Boolean  @default(false)
-  limitedEdition Boolean  @default(false)
-  editionSize    Int      @default(100)  // total prints in edition
-  editionSold    Int      @default(0)    // prints already sold
-  views          Int      @default(0)
-  status         String   @default("published") // published | draft
-  basePrice      Int      @default(4500) // in INR
-  categoryId     String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  collections CollectionPhoto[]
-  analytics   Analytics[]
-
-  @@map("photos")
-}
-
-// ─── Collection ───────────────────────────────────────────────────────────────
-model Collection {
+// ─── Frame Material ───────────────────────────────────────────────────────────
+model FrameMaterial {
   id          String   @id @default(cuid())
-  name        String   @unique
-  slug        String   @unique
+  name        String   @unique  // Wood | Metal | Composite
   description String?
-  imageUrl    String?
+  priceAdder  Int      @default(0) // Additional cost
   order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  photos CollectionPhoto[]
+  frames FrameDesign[]
 
-  @@map("collections")
+  @@map("frame_materials")
 }
 
-// ─── CollectionPhoto (Join Table) ─────────────────────────────────────────────
-model CollectionPhoto {
-  collectionId String
-  photoId      String
-  order        Int @default(0)
+// ─── Frame Color ──────────────────────────────────────────────────────────────
+model FrameColor {
+  id        String   @id @default(cuid())
+  name      String   @unique  // Black, White, Oak, Walnut, Gold, Silver, Cherry
+  hex       String   @default("#000000")
+  order     Int      @default(0)
 
-  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  photo      Photo      @relation(fields: [photoId], references: [id], onDelete: Cascade)
-
-  @@id([collectionId, photoId])
-  @@map("collection_photos")
+  @@map("frame_colors")
 }
 
-// ─── Frame ────────────────────────────────────────────────────────────────────
-model Frame {
-  id       String @id @default(cuid())
-  name     String // Black, White, Oak, Walnut, Gold
-  color    String
-  material String // Wood | Metal
-  price    Int    @default(1500) // Additional cost in INR
-
-  @@map("frames")
-}
-
-// ─── PrintSize ────────────────────────────────────────────────────────────────
-model PrintSize {
+// ─── Frame Size ───────────────────────────────────────────────────────────────
+model FrameSize {
   id        String  @id @default(cuid())
-  label     String  // "8×10", "12×18", "16×24", "24×36", "Custom"
+  label     String  @unique // "8×10", "12×18", "16×24", "24×36", "Custom"
   width     Int     // inches
   height    Int     // inches
-  basePrice Int     @default(3500) // in INR
+  basePrice Int     @default(1500) // in INR
   isCustom  Boolean @default(false)
   order     Int     @default(0)
 
-  @@map("print_sizes")
+  @@map("frame_sizes")
 }
 
-// ─── PrintFinish ──────────────────────────────────────────────────────────────
-model PrintFinish {
-  id    String @id @default(cuid())
-  name  String @unique // Matte, Glossy, Fine Art Paper, Canvas
-  price Int    @default(0) // Additional cost in INR
-  order Int    @default(0)
-
-  @@map("print_finishes")
-}
-
-// ─── GlassOption ─────────────────────────────────────────────────────────────
+// ─── Glass Option ─────────────────────────────────────────────────────────────
 model GlassOption {
-  id    String @id @default(cuid())
-  name  String @unique // Standard Glass, Anti-Glare Glass
-  price Int    @default(0)
-  order Int    @default(0)
+  id          String @id @default(cuid())
+  name        String @unique // Standard, Anti-Glare, UV-Protection
+  description String?
+  price       Int    @default(0)
+  order       Int    @default(0)
 
   @@map("glass_options")
 }
 
-// ─── MountOption ─────────────────────────────────────────────────────────────
+// ─── Mount Option ─────────────────────────────────────────────────────────────
 model MountOption {
-  id    String @id @default(cuid())
-  name  String @unique // With Mount, Without Mount
-  price Int    @default(0)
-  order Int    @default(0)
+  id          String @id @default(cuid())
+  name        String @unique // With Mount, Without Mount
+  description String?
+  price       Int    @default(0)
+  order       Int    @default(0)
 
   @@map("mount_options")
+}
+
+// ─── Frame Design ─────────────────────────────────────────────────────────────
+model FrameDesign {
+  id                String   @id @default(cuid())
+  name              String
+  slug              String   @unique
+  description       String?  @db.Text
+  imageUrl          String   // Primary product image
+  galleryImages     String[] // Additional images
+  material          String   // Wood | Metal | Composite
+  colors            String[] // Available colors
+  availableSizes    String[] // Size labels available for this frame
+  thickness         String   @default("2cm") // Frame thickness/width
+  basePrice         Int      @default(2500)  // Starting price in INR
+  productionDays    Int      @default(3)     // Estimated days to produce
+  featured          Boolean  @default(false)
+  bestseller        Boolean  @default(false)
+  isAvailable       Boolean  @default(true)
+  categoryId        String?
+  order             Int      @default(0)
+  views             Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  category  FrameCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  reviews   FrameReview[]
+  analytics Analytics[]
+
+  @@map("frame_designs")
+}
+
+// ─── Frame Review ─────────────────────────────────────────────────────────────
+model FrameReview {
+  id          String   @id @default(cuid())
+  frameId     String
+  customerName String
+  rating      Int      @default(5)
+  comment     String   @db.Text
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  frame FrameDesign @relation(fields: [frameId], references: [id], onDelete: Cascade)
+
+  @@map("frame_reviews")
+}
+
+// ─── Customer Inquiry ─────────────────────────────────────────────────────────
+model Inquiry {
+  id              String   @id @default(cuid())
+  // Customer Info
+  customerName    String
+  email           String
+  phone           String
+  whatsapp        String?
+  // Order Details
+  frameName       String?
+  frameId         String?
+  material        String?
+  color           String?
+  size            String?
+  customWidth     Int?     // inches, if custom size
+  customHeight    Int?     // inches, if custom size
+  glass           String?
+  mount           String?
+  quantity        Int      @default(1)
+  // Photo
+  photoOption     String   @default("upload") // "upload" | "bring"
+  uploadedImageUrl String?
+  // Status & Admin
+  status          String   @default("pending") // pending | confirmed | in_progress | completed | cancelled
+  notes           String?  @db.Text
+  totalEstimate   Int?     // Admin-filled estimated total in INR
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("inquiries")
+}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+model Service {
+  id          String   @id @default(cuid())
+  title       String   @unique
+  slug        String   @unique
+  description String   @db.Text
+  overview    String?  @db.Text
+  includes    Json?    // Array of feature strings
+  startingPrice Int    @default(0)
+  duration    String?  // e.g. "3–5 working days"
+  heroImage   String?
+  gallery     Json?    // Array of image URLs
+  faqs        Json?    // Array of { question, answer }
+  featured    Boolean  @default(false)
+  status      String   @default("active") // active | inactive
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
 }
 
 // ─── Testimonial ──────────────────────────────────────────────────────────────
 model Testimonial {
   id        String   @id @default(cuid())
   name      String
-  title     String?
-  quote     String
+  title     String?  // e.g. "Interior Designer, Delhi"
+  quote     String   @db.Text
   rating    Int      @default(5)
   photoUrl  String?
+  featured  Boolean  @default(false)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("testimonials")
-}
-
-// ─── Blog ─────────────────────────────────────────────────────────────────────
-model Blog {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  excerpt     String?
-  content     String   @db.Text
-  coverImage  String?
-  tags        String[]
-  published   Boolean  @default(false)
-  authorId    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  author Admin? @relation(fields: [authorId], references: [id], onDelete: SetNull)
-
-  @@map("blogs")
 }
 
 // ─── Newsletter ───────────────────────────────────────────────────────────────
@@ -209,20 +224,21 @@ model Newsletter {
 // ─── Settings ─────────────────────────────────────────────────────────────────
 model Settings {
   id                String  @id @default(cuid())
-  photographerName  String  @default("Sikhar")
-  whatsappNumber    String  @default("919876543210")
-  phone             String  @default("+91 98765 43210")
-  email             String  @default("hello@sikhar.photography")
+  businessName      String  @default("Craft Creator's")
+  tagline           String  @default("Custom Photo Framing, Crafted with Precision")
+  whatsappNumber    String  @default("918077037277")
+  phone             String  @default("+91 80770 37277")
+  email             String  @default("hello@craftcreators.in")
   address           String  @default("Mumbai, Maharashtra, India")
-  instagramUrl      String  @default("https://instagram.com/sikhar.photography")
-  facebookUrl       String  @default("https://facebook.com/sikhar.photography")
-  youtubeUrl        String  @default("https://youtube.com/@sikhar.photography")
-  heroTitle         String  @default("Capturing Light, Crafting Moments")
-  heroSubtitle      String  @default("Fine art prints for discerning collectors")
+  instagramUrl      String  @default("https://www.instagram.com/craft_creators_original")
+  facebookUrl       String  @default("https://facebook.com/craftcreators")
+  youtubeUrl        String  @default("https://youtube.com/@craftcreators")
+  heroTitle         String  @default("Frame Your Memories,\nForever")
+  heroSubtitle      String  @default("Premium custom photo framing — your photographs, our craftsmanship")
   heroImage         String?
-  aboutText         String  @default("Sikhar is a fine art photographer based in Mumbai, specializing in landscape, wildlife, and travel photography.")
-  seoTitle          String  @default("Sikhar | Fine Art Photography")
-  seoDescription    String  @default("Luxury fine art prints by Sikhar. Landscape, wildlife, travel, and nature photography. Custom framed prints ordered via WhatsApp.")
+  aboutText         String  @default("Craft Creator's is a premium custom photo framing studio dedicated to preserving your most cherished memories in frames of exceptional quality.")
+  seoTitle          String  @default("Craft Creator's | Premium Custom Photo Framing Studio")
+  seoDescription    String  @default("Premium custom photo framing in Mumbai. Upload your photo or bring a printed copy. Choose from 40+ frame styles. Order via WhatsApp.")
 
   @@map("settings")
 }
@@ -230,104 +246,12 @@ model Settings {
 // ─── Analytics ────────────────────────────────────────────────────────────────
 model Analytics {
   id        String   @id @default(cuid())
-  event     String   // "view" | "whatsapp_click" | "favorite"
-  photoId   String?
+  event     String   // "frame_view" | "whatsapp_click" | "configurator_start" | "inquiry_submit"
+  frameId   String?
   meta      String?  // JSON string for additional data
   createdAt DateTime @default(now())
 
-  photo Photo? @relation(fields: [photoId], references: [id], onDelete: SetNull)
+  frame FrameDesign? @relation(fields: [frameId], references: [id], onDelete: SetNull)
 
   @@map("analytics")
-}
-
-
-// ============================================================================
-// PHASE 2: SERVICES, BOOKINGS, CLIENT GALLERIES
-// ============================================================================
-
-// ─── Service ────────────────────────────────────────────────────────────────
-model Service {
-  id            String   @id @default(cuid())
-  title         String   @unique
-  slug          String   @unique
-  description   String   @db.Text
-  overview      String?  @db.Text
-  includes      Json?    // Array of strings (features included)
-  price         Int      @default(0) // Starting price
-  duration      String?
-  heroImage     String?
-  gallery       Json?    // Array of image URLs
-  faqs          Json?    // Array of { question, answer }
-  featured      Boolean  @default(false)
-  status        String   @default("active") // active | inactive
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  bookings      Booking[]
-
-  @@map("services")
-}
-
-// ─── Booking ────────────────────────────────────────────────────────────────
-model Booking {
-  id               String   @id @default(cuid())
-  name             String
-  email            String
-  phone            String
-  whatsapp         String?
-  eventType        String?
-  preferredDate    DateTime?
-  alternateDate    DateTime?
-  time             String?
-  location         String?
-  guests           Int?
-  budget           Int?
-  requirements     String?  @db.Text
-  referenceImages  Json?    // Array of image URLs
-  status           String   @default("pending") // pending | confirmed | completed | cancelled
-  notes            String?  @db.Text
-  serviceId        String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-
-  @@map("bookings")
-}
-
-// ─── Client Gallery ─────────────────────────────────────────────────────────
-model ClientGallery {
-  id               String   @id @default(cuid())
-  title            String
-  slug             String   @unique
-  clientName       String
-  eventName        String?
-  eventDate        DateTime?
-  description      String?  @db.Text
-  coverImage       String?
-  password         String?  // Can be plain text for simple client sharing
-  status           String   @default("active") // active | archived
-  expiryDate       DateTime?
-  downloadsEnabled Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  images           GalleryImage[]
-
-  @@map("client_galleries")
-}
-
-// ─── Gallery Image ──────────────────────────────────────────────────────────
-model GalleryImage {
-  id             String   @id @default(cuid())
-  galleryId      String
-  imageUrl       String
-  cloudinaryId   String?
-  watermarkUrl   String?
-  order          Int      @default(0)
-  createdAt      DateTime @default(now())
-
-  gallery ClientGallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
-
-  @@map("gallery_images")
 }

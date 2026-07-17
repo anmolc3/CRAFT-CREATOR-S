@@ -1,41 +1,29 @@
-/**
- * Axios API base instance
- * All services import from this file
- */
-
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Request interceptor — attach JWT token for admin routes
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('admin_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// Attach auth token to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('admin_token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-// Response interceptor — handle 401 globally
+// Handle 401 globally
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
       localStorage.removeItem('admin_token');
-      localStorage.removeItem('admin_user');
-      // Only redirect if we're on an admin page
-      if (window.location.pathname.startsWith('/admin') && !window.location.pathname.includes('/login')) {
-        window.location.href = '/admin/login';
-      }
+      window.location.href = '/admin/login';
     }
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );
 

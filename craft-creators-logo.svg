@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200"
+     height="1200"
+     viewBox="0 0 1200 1200">
+
+    <defs>
+        <path id="topArc"
+              d="M 150 600 A 450 450 0 0 1 1050 600" />
+        <path id="bottomArc"
+              d="M 1050 600 A 450 450 0 0 1 150 600" />
+    </defs>
+
+    <circle cx="600" cy="600" r="560" fill="#000000"/>
+
+    <text font-family="Arial, Helvetica, sans-serif"
+          font-size="72"
+          font-weight="700"
+          fill="#16B9FF"
+          letter-spacing="8">
+        <textPath href="#topArc" startOffset="50%" text-anchor="middle">
+            CRAFT CREATOR’S
+        </textPath>
+    </text>
+
+    <text font-family="Arial, Helvetica, sans-serif"
+          font-size="72"
+          font-weight="700"
+          fill="#FF2D9A"
+          letter-spacing="8">
+        <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">
+            CREATING MEMORIES
+        </textPath>
+    </text>
+
+    <path fill="#FF2D9A" d="
+        M640 235
+        C730 235 785 300 785 390
+        L785 495
+        C785 535 760 560 720 560
+        C680 560 655 535 655 495
+        L655 410
+        C655 385 640 370 615 370
+        C590 370 575 390 575 420
+        L575 780
+        C575 810 590 830 615 830
+        C640 830 655 815 655 790
+        L655 700
+        C655 660 680 635 720 635
+        C760 635 785 660 785 700
+        L785 810
+        C785 900 730 965 640 965
+        L560 965
+        C470 965 415 900 415 810
+        L415 390
+        C415 300 470 235 560 235
+        Z"/>
+
+    <rect x="594" y="235" width="12" height="730" fill="#000000"/>
+</svg>

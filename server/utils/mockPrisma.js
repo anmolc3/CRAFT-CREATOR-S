@@ -1,323 +1,377 @@
 /**
- * In-memory Mock Prisma Client
- * Emulates CRUD operations on seed data to run the site without PostgreSQL.
+ * CRAFT CREATOR'S — In-memory Mock Prisma Client
+ * Emulates CRUD operations on seed data to run without PostgreSQL.
+ * Set USE_MOCK_DB=true in .env to activate.
  */
 
 const bcrypt = require('bcryptjs');
 const slugify = require('slugify');
-const { SERVICES, CATEGORIES, SIZES, FRAMES, TESTIMONIALS, PHOTOS, COLLECTIONS, BLOGS } = require('../prisma/seed');
+const {
+  FRAME_CATEGORIES,
+  FRAME_MATERIALS,
+  FRAME_COLORS,
+  FRAME_SIZES,
+  GLASS_OPTIONS,
+  MOUNT_OPTIONS,
+  FRAME_DESIGNS,
+  SERVICES,
+  TESTIMONIALS,
+} = require('../prisma/seed');
 
 const slug = (str) => slugify(str, { lower: true, strict: true, trim: true });
 
 // Hash default admin password
 const adminHashedPassword = bcrypt.hashSync('Admin@1234', 10);
 
-// Initialize DB tables
+// ─── Initialize DB Tables ─────────────────────────────────────────────────────
 const db = {
   admin: [
     {
       id: 'admin-1',
-      name: 'Sikhar',
-      email: 'admin@sikhar.photography',
+      name: 'Craft Creator\'s Admin',
+      email: 'admin@craftcreators.in',
       password: adminHashedPassword,
       createdAt: new Date(),
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   ],
-  category: CATEGORIES.map((c, index) => ({
-    id: `cat-${index + 1}`,
+
+  frameCategory: FRAME_CATEGORIES.map((c, i) => ({
+    id: `cat-${i + 1}`,
     name: c.name,
-    slug: slug(c.name),
-    description: c.description,
-    imageUrl: c.imageUrl,
+    slug: c.slug,
+    description: c.description || null,
+    imageUrl: null,
     order: c.order,
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   })),
-  printSize: SIZES.map((s) => ({
-    id: s.label.replace('×', 'x'),
+
+  frameMaterial: FRAME_MATERIALS.map((m, i) => ({
+    id: `mat-${i + 1}`,
+    name: m.name,
+    description: m.description || null,
+    priceAdder: m.priceAdder || 0,
+    order: m.order,
+  })),
+
+  frameColor: FRAME_COLORS.map((c, i) => ({
+    id: `col-${i + 1}`,
+    name: c.name,
+    hex: c.hex,
+    order: c.order,
+  })),
+
+  frameSize: FRAME_SIZES.map((s, i) => ({
+    id: `size-${i + 1}`,
     label: s.label,
     width: s.width,
     height: s.height,
     basePrice: s.basePrice,
     isCustom: !!s.isCustom,
     order: s.order,
-    createdAt: new Date(),
-    updatedAt: new Date()
   })),
-  frame: FRAMES.map((f, index) => ({
-    id: `frame-${index + 1}`,
-    name: f.name,
-    color: f.color,
-    material: f.material,
-    price: f.price,
-    createdAt: new Date(),
-    updatedAt: new Date()
+
+  glassOption: GLASS_OPTIONS.map((g, i) => ({
+    id: `glass-${i + 1}`,
+    name: g.name,
+    description: g.description || null,
+    price: g.price,
+    order: g.order,
   })),
-  printFinish: [
-    { id: 'finish-1', name: 'Matte', price: 0, order: 1 },
-    { id: 'finish-2', name: 'Glossy', price: 0, order: 2 },
-    { id: 'finish-3', name: 'Fine Art Paper', price: 1000, order: 3 },
-    { id: 'finish-4', name: 'Canvas', price: 2000, order: 4 }
-  ],
-  glassOption: [
-    { id: 'glass-1', name: 'Standard Glass', price: 0, order: 1 },
-    { id: 'glass-2', name: 'Anti-Glare Glass', price: 1200, order: 2 }
-  ],
-  mountOption: [
-    { id: 'mount-1', name: 'Without Mount', price: 0, order: 1 },
-    { id: 'mount-2', name: 'With Mount', price: 800, order: 2 }
-  ],
-  photo: [],
-  collection: COLLECTIONS.map((col, index) => ({
-    id: `col-${index + 1}`,
-    name: col.name,
-    slug: col.slug,
-    description: col.description,
-    imageUrl: col.imageUrl,
-    order: col.order,
-    createdAt: new Date(),
-    updatedAt: new Date()
+
+  mountOption: MOUNT_OPTIONS.map((m, i) => ({
+    id: `mount-${i + 1}`,
+    name: m.name,
+    description: m.description || null,
+    price: m.price,
+    order: m.order,
   })),
-  collectionPhoto: [],
-  testimonial: TESTIMONIALS.map((t, index) => ({
-    id: `test-${index + 1}`,
-    name: t.name,
-    title: t.title,
-    quote: t.quote,
-    rating: t.rating || 5,
-    photoUrl: t.photoUrl || '/sample.png',
-    createdAt: new Date()
-  })),
-  blog: BLOGS.map((b, index) => ({
-    id: `blog-${index + 1}`,
-    title: b.title,
-    slug: b.slug,
-    excerpt: b.excerpt,
-    content: b.content,
-    coverImage: b.coverImage || '/sample.png',
-    tags: b.tags || [],
-    published: true,
-    authorId: 'admin-1',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  })),
-  settings: [
-    {
-      id: 'settings-1',
-      photographerName: 'Sikhar',
-      whatsappNumber: '918077037277',
-      phone: '+91 80770 37277',
-      email: 'hello@sikhar.photography',
-      address: 'Mumbai, Maharashtra, India',
-      instagramUrl: 'https://www.instagram.com/craft_creators_original?utm_source=qr&igsh=MTJubGxraXB3d3FqOA==',
-      facebookUrl: 'https://facebook.com/sikhar.photography',
-      youtubeUrl: 'https://youtube.com/@sikhar.photography',
-      heroTitle: 'Capturing Light,\nCrafting Eternity',
-      heroSubtitle: 'Fine art prints for discerning collectors — landscapes, wildlife, and the poetry of the natural world',
-      heroImage: '/sample.png',
-      aboutText: 'Sikhar is an award-winning fine art photographer based in Mumbai, India. For over a decade, he has pursued the extraordinary in the ordinary — from the soaring peaks of the Himalayas to the intimate silence of a forest at dawn. His work has been exhibited in galleries across London, New York, Mumbai, and Singapore, and his limited-edition prints are held in private collections across six continents.',
-      seoTitle: 'Sikhar | Fine Art Photography & Premium Prints',
-      seoDescription: 'Luxury fine art prints by Sikhar. Landscape, wildlife, travel, and nature photography from India and around the world. Custom framed prints ordered via WhatsApp.',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  ],
-  service: SERVICES.map((s, index) => ({
-    id: `serv-${index + 1}`,
+
+  frameDesign: [],
+  frameReview: [],
+
+  service: SERVICES.map((s, i) => ({
+    id: `serv-${i + 1}`,
     title: s.title,
-    slug: slug(s.title),
+    slug: s.slug,
     description: s.description,
-    overview: s.overview,
+    overview: s.overview || null,
     includes: s.includes || [],
-    price: s.price || 0,
-    duration: s.duration,
-    heroImage: s.heroImage || '/sample.png',
-    gallery: s.gallery || [],
+    startingPrice: s.startingPrice || 0,
+    duration: s.duration || null,
+    heroImage: null,
+    gallery: [],
     faqs: s.faqs || [],
     featured: !!s.featured,
     status: 'active',
+    order: s.order || i + 1,
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   })),
-  booking: [
+
+  testimonial: TESTIMONIALS.map((t, i) => ({
+    id: `test-${i + 1}`,
+    name: t.name,
+    title: t.title || null,
+    quote: t.quote,
+    rating: t.rating || 5,
+    photoUrl: null,
+    featured: !!t.featured,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  })),
+
+  inquiry: [
     {
-      id: 'book-1',
-      name: 'Aisha Patel',
-      email: 'aisha.p@example.com',
-      phone: '+91 98200 12345',
-      whatsapp: '919820012345',
-      eventType: 'Wedding Photography',
-      preferredDate: new Date('2024-12-15'),
-      alternateDate: new Date('2024-12-16'),
-      time: 'Morning',
-      location: 'Colaba, Mumbai',
-      guests: 250,
-      budget: 200000,
-      requirements: 'Interested in candid portraiture and full-day wedding coverage.',
-      referenceImages: [],
+      id: 'inq-demo-1',
+      customerName: 'Priya Sharma',
+      email: 'priya.sharma@example.com',
+      phone: '+91 98200 11111',
+      whatsapp: '919820011111',
+      frameName: 'Teak Classic',
+      frameId: null,
+      material: 'Solid Wood',
+      color: 'Natural Oak',
+      size: '16×24',
+      customWidth: null,
+      customHeight: null,
+      glass: 'Anti-Glare Glass',
+      mount: 'White Mount',
+      quantity: 1,
+      photoOption: 'upload',
+      uploadedImageUrl: null,
       status: 'pending',
-      notes: 'Aisha contacted us via the booking form.',
-      serviceId: 'serv-1',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  ],
-  clientGallery: [
+      notes: null,
+      totalEstimate: null,
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(),
+    },
     {
-      id: 'gal-1',
-      title: 'Mehta Wedding Highlights',
-      slug: 'mehta-wedding-highlights',
-      clientName: 'Rohan & Priya Mehta',
-      eventName: 'Wedding Ceremony',
-      eventDate: new Date('2024-02-14'),
-      description: 'A curated selection of highlights from Rohan & Priya\'s wedding at the Taj Mahal Palace, Mumbai.',
-      coverImage: '/sample.png',
-      password: 'Priya',
-      status: 'active',
-      expiryDate: new Date('2025-02-14'),
-      downloadsEnabled: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
+      id: 'inq-demo-2',
+      customerName: 'Rohan Mehta',
+      email: 'rohan.mehta@example.com',
+      phone: '+91 99300 22222',
+      whatsapp: '919930022222',
+      frameName: 'Grand Imperial',
+      frameId: null,
+      material: 'Composite',
+      color: 'Antique Gold',
+      size: '12×18',
+      customWidth: null,
+      customHeight: null,
+      glass: 'Museum Glass',
+      mount: 'Double Mount',
+      quantity: 2,
+      photoOption: 'bring',
+      uploadedImageUrl: null,
+      status: 'confirmed',
+      notes: 'Wedding portraits. Customer will bring physical prints.',
+      totalEstimate: 24000,
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(),
+    },
+    {
+      id: 'inq-demo-3',
+      customerName: 'Arjun Kapoor',
+      email: 'arjun.kapoor@example.com',
+      phone: '+91 97700 33333',
+      whatsapp: '919770033333',
+      frameName: 'Black Obsidian',
+      frameId: null,
+      material: 'MDF Wood',
+      color: 'Matte Black',
+      size: '24×36',
+      customWidth: null,
+      customHeight: null,
+      glass: 'UV-Protection Glass',
+      mount: 'Without Mount',
+      quantity: 3,
+      photoOption: 'upload',
+      uploadedImageUrl: null,
+      status: 'in_progress',
+      notes: 'Corporate office installation. Rush order.',
+      totalEstimate: 18000,
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(),
+    },
+    {
+      id: 'inq-demo-4',
+      customerName: 'Meera Nair',
+      email: 'meera.nair@example.com',
+      phone: '+91 96600 44444',
+      whatsapp: '919660044444',
+      frameName: 'Regency Gold',
+      frameId: null,
+      material: 'Composite',
+      color: 'Antique Gold',
+      size: '8×10',
+      customWidth: null,
+      customHeight: null,
+      glass: 'Standard Glass',
+      mount: 'Cream Mount',
+      quantity: 1,
+      photoOption: 'bring',
+      uploadedImageUrl: null,
+      status: 'completed',
+      notes: null,
+      totalEstimate: 4500,
+      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(),
+    },
   ],
-  galleryImage: [
-    { id: 'gal-img-1', galleryId: 'gal-1', imageUrl: '/sample.png', order: 1, createdAt: new Date() },
-    { id: 'gal-img-2', galleryId: 'gal-1', imageUrl: '/sample.png', order: 2, createdAt: new Date() },
-    { id: 'gal-img-3', galleryId: 'gal-1', imageUrl: '/sample.png', order: 3, createdAt: new Date() }
-  ],
+
   newsletter: [],
-  analytics: []
+  analytics: [],
+
+  settings: [
+    {
+      id: 'settings-1',
+      businessName: 'Craft Creator\'s',
+      tagline: 'Custom Photo Framing, Crafted with Precision',
+      whatsappNumber: '918077037277',
+      phone: '+91 80770 37277',
+      email: 'hello@craftcreators.in',
+      address: 'Mumbai, Maharashtra, India',
+      instagramUrl: 'https://www.instagram.com/craft_creators_original',
+      facebookUrl: 'https://facebook.com/craftcreators',
+      youtubeUrl: 'https://youtube.com/@craftcreators',
+      heroTitle: 'Frame Your Memories,\nForever',
+      heroSubtitle: 'Premium custom photo framing — your photographs, our craftsmanship',
+      heroImage: null,
+      aboutText: 'Craft Creator\'s is a premium custom photo framing studio based in Mumbai, dedicated to preserving your most cherished memories in frames of exceptional quality. From intimate family portraits to large-format art prints, we craft each frame by hand using premium materials and time-honoured techniques.',
+      seoTitle: 'Craft Creator\'s | Premium Custom Photo Framing Studio',
+      seoDescription: 'Premium custom photo framing in Mumbai. Upload your photo or bring a printed copy. Choose from 40+ frame styles. Order via WhatsApp.',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ],
 };
 
-// Maps for fast lookups during initial loading
+// ─── Hydrate Frame Designs ─────────────────────────────────────────────────────
 const categoryMap = {};
-db.category.forEach(c => { categoryMap[c.name] = c.id; });
+db.frameCategory.forEach(c => { categoryMap[c.name] = c.id; });
 
-const collectionMap = {};
-db.collection.forEach(c => { collectionMap[c.slug] = c.id; });
+db.frameDesign = FRAME_DESIGNS.map((f, i) => ({
+  id: `frame-${i + 1}`,
+  name: f.name,
+  slug: f.slug,
+  description: f.description || null,
+  imageUrl: f.imageUrl,
+  galleryImages: f.galleryImages || [],
+  material: f.material,
+  colors: f.colors || [],
+  availableSizes: f.availableSizes || [],
+  thickness: f.thickness || '2cm',
+  basePrice: f.basePrice || 2000,
+  productionDays: f.productionDays || 3,
+  featured: !!f.featured,
+  bestseller: !!f.bestseller,
+  isAvailable: true,
+  categoryId: categoryMap[f.category] || null,
+  order: i + 1,
+  views: Math.floor(Math.random() * 300) + 50,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}));
 
-// Hydrate Photos
-db.photo = PHOTOS.map((p, index) => {
-  const photoSlug = slug(p.title);
-  return {
-    id: `photo-${index + 1}`,
-    title: p.title,
-    slug: photoSlug,
-    description: p.description,
-    story: p.story,
-    imageUrl: p.imageUrl,
-    galleryImages: [],
-    cloudinaryId: null,
-    width: 6000,
-    height: 4000,
-    resolution: p.resolution || '24 MP',
-    orientation: p.orientation || (index % 2 === 0 ? 'landscape' : 'portrait'),
-    camera: p.camera || 'Sony A7R V',
-    lens: p.lens || 'Sony 24-70mm f/2.8',
-    iso: p.iso || 'ISO 100',
-    aperture: p.aperture || 'f/8',
-    shutterSpeed: p.shutterSpeed || '1/125s',
-    location: p.location || 'India',
-    dateTaken: new Date('2023-01-01'),
-    tags: [p.category.toLowerCase(), 'fine art', 'print'],
-    palette: ['#000000', '#ffffff'],
-    featured: !!p.featured,
-    bestSeller: !!p.bestSeller,
-    limitedEdition: !!p.limitedEdition,
-    editionSize: 100,
-    editionSold: 0,
-    views: Math.floor(Math.random() * 200),
-    status: 'published',
-    basePrice: p.basePrice || 4500,
-    categoryId: categoryMap[p.category] || null,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-});
+// Assign demo frameIds to inquiries
+db.inquiry[0].frameId = db.frameDesign.find(f => f.name === 'Teak Classic')?.id || null;
+db.inquiry[1].frameId = db.frameDesign.find(f => f.name === 'Grand Imperial')?.id || null;
+db.inquiry[2].frameId = db.frameDesign.find(f => f.name === 'Black Obsidian')?.id || null;
+db.inquiry[3].frameId = db.frameDesign.find(f => f.name === 'Regency Gold')?.id || null;
 
-const photoMap = {};
-db.photo.forEach(p => { photoMap[p.title] = p.id; });
-
-// Hydrate CollectionPhoto relations
-const bestSellerPhotos = PHOTOS.filter(p => p.bestSeller).map(p => p.title);
-const limitedEditionPhotos = PHOTOS.filter(p => p.limitedEdition).map(p => p.title);
-const featuredPhotos = PHOTOS.filter(p => p.featured).map(p => p.title);
-const indiaPhotos = ['Varanasi Ghats at Dawn', 'Jodhpur Blue City', 'Tiger in the Mist', 'Chai Wallah at Dawn', 'The Sadhu of Pushkar', 'Rann of Kutch Full Moon', 'Milky Way over Ladakh', 'Pangong Lake at Sunrise', 'Rajasthani Wedding', 'Kolkata Rickshaw'];
-const africaPhotos = ['Monarch of the Mara', 'Cheetah Sprint', 'Elephant Matriarch', 'Flamingo Ballet', 'Great Migration Crossing'];
-const darkSkyPhotos = ['Northern Lights over Tromsø', 'Milky Way over Ladakh', 'Bioluminescent Bay'];
-const monoPhotos = ['Rain on Glass', 'Mumbai Monsoon', 'Geometry of Silence'];
-
-const collectionAssignments = [
-  { slug: 'best-sellers', photos: bestSellerPhotos },
-  { slug: 'editors-choice', photos: featuredPhotos },
-  { slug: 'limited-edition', photos: limitedEditionPhotos },
-  { slug: 'new-arrivals', photos: PHOTOS.slice(-8).map(p => p.title) },
-  { slug: 'india-series', photos: indiaPhotos },
-  { slug: 'african-wildlife', photos: africaPhotos },
-  { slug: 'dark-skies', photos: darkSkyPhotos },
-  { slug: 'urban-monochrome', photos: monoPhotos },
+// ─── Frame Reviews ────────────────────────────────────────────────────────────
+db.frameReview = [
+  {
+    id: 'rev-1',
+    frameId: db.frameDesign.find(f => f.name === 'Teak Classic')?.id,
+    customerName: 'Sunita M.',
+    rating: 5,
+    comment: 'Absolutely beautiful frame. The wood grain is stunning and the finish is flawless. Highly recommend.',
+    verified: true,
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'rev-2',
+    frameId: db.frameDesign.find(f => f.name === 'Teak Classic')?.id,
+    customerName: 'Rahul K.',
+    rating: 5,
+    comment: 'Got this for my parents\' anniversary photo. They loved it. Great quality and fast delivery.',
+    verified: true,
+    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'rev-3',
+    frameId: db.frameDesign.find(f => f.name === 'Metro Slim')?.id,
+    customerName: 'Anika P.',
+    rating: 5,
+    comment: 'The Metro Slim is perfect for my modern apartment. Clean, minimal, and the quality is top-notch.',
+    verified: true,
+    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'rev-4',
+    frameId: db.frameDesign.find(f => f.name === 'Regency Gold')?.id,
+    customerName: 'Vikram S.',
+    rating: 5,
+    comment: 'Ordered for my wedding portrait. The Regency Gold frame is majestic — better in person than in photos.',
+    verified: true,
+    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'rev-5',
+    frameId: db.frameDesign.find(f => f.name === 'Float Classic')?.id,
+    customerName: 'Priya R.',
+    rating: 4,
+    comment: 'Love the floating effect. Really gives the photo a gallery feel. Would rate 5 stars but delivery took slightly longer than expected.',
+    verified: true,
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'rev-6',
+    frameId: db.frameDesign.find(f => f.name === 'Black Obsidian')?.id,
+    customerName: 'James H.',
+    rating: 5,
+    comment: 'The gloss black finish is stunning. Really makes the colours in my landscape photo pop.',
+    verified: true,
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+  },
 ];
 
-collectionAssignments.forEach(({ slug: colSlug, photos: pTitles }) => {
-  const colId = collectionMap[colSlug];
-  if (!colId) return;
-  pTitles.forEach((title, i) => {
-    const photoId = photoMap[title];
-    if (!photoId) return;
-    db.collectionPhoto.push({
-      collectionId: colId,
-      photoId,
-      order: i
-    });
-  });
-});
-
-// Helper functions for matching logic
+// ─── Generic makeMockModel ────────────────────────────────────────────────────
 const matchesFilter = (item, key, filter, tableName) => {
   if (filter && typeof filter === 'object' && !Array.isArray(filter)) {
     if (filter.hasOwnProperty('contains')) {
       const fieldVal = (item[key] || '').toString().toLowerCase();
-      const searchVal = filter.contains.toLowerCase();
-      return fieldVal.includes(searchVal);
+      return fieldVal.includes(filter.contains.toLowerCase());
     }
     if (filter.hasOwnProperty('hasSome')) {
       const fieldArray = item[key] || [];
-      const searchArray = filter.hasSome || [];
-      return searchArray.some(val => fieldArray.includes(val));
+      return (filter.hasSome || []).some(val => fieldArray.includes(val));
     }
     if (filter.hasOwnProperty('not')) {
       return item[key] !== filter.not;
     }
-    
-    // Relation filter logic
-    if (tableName === 'photo' && key === 'category') {
-      const cat = db.category.find(c => c.id === item.categoryId);
+    if (filter.hasOwnProperty('in')) {
+      return filter.in.includes(item[key]);
+    }
+    if (filter.hasOwnProperty('gte')) {
+      return item[key] >= filter.gte;
+    }
+    if (filter.hasOwnProperty('lte')) {
+      return item[key] <= filter.lte;
+    }
+    // Relation filter for frameDesign -> category
+    if (tableName === 'frameDesign' && key === 'category') {
+      const cat = db.frameCategory.find(c => c.id === item.categoryId);
       if (!cat) return false;
       return Object.entries(filter).every(([k, v]) => cat[k] === v);
     }
-    if (tableName === 'photo' && key === 'collections') {
-      if (filter.some) {
-        return db.collectionPhoto.some(cp => {
-          if (cp.photoId !== item.id) return false;
-          const col = db.collection.find(c => c.id === cp.collectionId);
-          if (!col) return false;
-          if (filter.some.collection) {
-            return Object.entries(filter.some.collection).every(([k, v]) => col[k] === v);
-          }
-          return true;
-        });
-      }
-    }
-    if (tableName === 'collectionPhoto' && key === 'collection') {
-      const col = db.collection.find(c => c.id === item.collectionId);
-      if (!col) return false;
-      return Object.entries(filter).every(([k, v]) => col[k] === v);
-    }
-    if (tableName === 'collectionPhoto' && key === 'photo') {
-      const p = db.photo.find(ph => ph.id === item.photoId);
-      if (!p) return false;
-      return Object.entries(filter).every(([k, v]) => p[k] === v);
+    if (tableName === 'frameReview' && key === 'frame') {
+      const frame = db.frameDesign.find(f => f.id === item.frameId);
+      if (!frame) return false;
+      return Object.entries(filter).every(([k, v]) => frame[k] === v);
     }
     return false;
   }
@@ -326,41 +380,34 @@ const matchesFilter = (item, key, filter, tableName) => {
 
 const evalWhere = (item, where, tableName) => {
   if (!where) return true;
-  
   if (where.OR) {
-    return where.OR.some(cond => {
-      return Object.entries(cond).every(([k, v]) => matchesFilter(item, k, v, tableName));
-    });
+    return where.OR.some(cond =>
+      Object.entries(cond).every(([k, v]) => matchesFilter(item, k, v, tableName))
+    );
   }
   if (where.AND) {
-    return where.AND.every(cond => {
-      return Object.entries(cond).every(([k, v]) => matchesFilter(item, k, v, tableName));
-    });
+    return where.AND.every(cond =>
+      Object.entries(cond).every(([k, v]) => matchesFilter(item, k, v, tableName))
+    );
   }
-  
   return Object.entries(where).every(([k, v]) => matchesFilter(item, k, v, tableName));
 };
 
 const makeMockModel = (tableName) => {
   const findMany = async (args = {}) => {
     let result = [...db[tableName]];
-    
+
     if (args.where) {
       result = result.filter(item => evalWhere(item, args.where, tableName));
     }
-    
+
     if (args.orderBy) {
       let key = 'id';
       let dir = 'asc';
-      if (Array.isArray(args.orderBy)) {
-        const first = args.orderBy[0];
-        if (first) {
-          key = Object.keys(first)[0];
-          dir = first[key];
-        }
-      } else {
-        key = Object.keys(args.orderBy)[0];
-        dir = args.orderBy[key];
+      const ob = Array.isArray(args.orderBy) ? args.orderBy[0] : args.orderBy;
+      if (ob) {
+        key = Object.keys(ob)[0];
+        dir = ob[key];
       }
       result.sort((a, b) => {
         if (a[key] < b[key]) return dir === 'asc' ? -1 : 1;
@@ -368,92 +415,66 @@ const makeMockModel = (tableName) => {
         return 0;
       });
     }
-    
-    if (args.skip !== undefined) {
-      result = result.slice(args.skip);
-    }
-    if (args.take !== undefined) {
-      result = result.slice(0, args.take);
-    }
-    
+
+    if (args.skip !== undefined) result = result.slice(args.skip);
+    if (args.take !== undefined) result = result.slice(0, args.take);
+
     if (args.include) {
       result = result.map(item => {
         const enriched = { ...item };
         if (args.include.category) {
-          enriched.category = db.category.find(c => c.id === item.categoryId) || null;
+          enriched.category = db.frameCategory.find(c => c.id === item.categoryId) || null;
         }
-        if (args.include.images) {
-          enriched.images = db.galleryImage.filter(gi => gi.galleryId === item.id)
-            .sort((a, b) => a.order - b.order);
+        if (args.include.reviews) {
+          enriched.reviews = db.frameReview.filter(r => r.frameId === item.id);
         }
-        if (args.include.photos) {
-          const cpList = db.collectionPhoto.filter(cp => cp.collectionId === item.id);
-          enriched.photos = cpList.map(cp => {
-            const p = db.photo.find(ph => ph.id === cp.photoId);
-            return {
-              ...cp,
-              photo: p ? { ...p, category: db.category.find(c => c.id === p.categoryId) || null } : null
-            };
-          });
-        }
-        if (args.include.service) {
-          enriched.service = db.service.find(s => s.id === item.serviceId) || null;
+        if (args.include.frames) {
+          enriched.frames = db.frameDesign.filter(f => f.categoryId === item.id);
         }
         if (args.include._count) {
           enriched._count = {};
-          if (args.include._count.select && args.include._count.select.photos) {
-            enriched._count.photos = db.collectionPhoto.filter(cp => cp.collectionId === item.id).length;
-          }
-        }
-        if (args.include.author) {
-          const authorRecord = db.admin.find(a => a.id === item.authorId);
-          if (authorRecord) {
-            if (args.include.author.select) {
-              const selected = {};
-              Object.keys(args.include.author.select).forEach(sk => {
-                selected[sk] = authorRecord[sk];
-              });
-              enriched.author = selected;
-            } else {
-              enriched.author = authorRecord;
+          if (args.include._count.select) {
+            if (args.include._count.select.frames) {
+              enriched._count.frames = db.frameDesign.filter(f => f.categoryId === item.id).length;
             }
-          } else {
-            enriched.author = null;
+            if (args.include._count.select.reviews) {
+              enriched._count.reviews = db.frameReview.filter(r => r.frameId === item.id).length;
+            }
           }
         }
         return enriched;
       });
     }
-    
+
     return result;
   };
-  
+
   const findUnique = async (args = {}) => {
     const records = await findMany({ where: args.where, include: args.include });
     return records[0] || null;
   };
-  
+
   const findFirst = async (args = {}) => {
     const records = await findMany({ where: args.where, include: args.include });
     return records[0] || null;
   };
-  
+
   const count = async (args = {}) => {
     const records = await findMany({ where: args.where });
     return records.length;
   };
-  
+
   const create = async (args = {}) => {
     const newItem = {
       id: args.data.id || `${tableName}-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...args.data
+      ...args.data,
     };
     db[tableName].push(newItem);
     return newItem;
   };
-  
+
   const update = async (args = {}) => {
     const index = db[tableName].findIndex(item => {
       for (const [key, value] of Object.entries(args.where)) {
@@ -465,11 +486,11 @@ const makeMockModel = (tableName) => {
     db[tableName][index] = {
       ...db[tableName][index],
       ...args.data,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     return db[tableName][index];
   };
-  
+
   const deleteRecord = async (args = {}) => {
     const index = db[tableName].findIndex(item => {
       for (const [key, value] of Object.entries(args.where)) {
@@ -478,31 +499,25 @@ const makeMockModel = (tableName) => {
       return true;
     });
     if (index === -1) throw new Error(`Record not found in ${tableName}`);
-    const deleted = db[tableName].splice(index, 1)[0];
-    return deleted;
+    return db[tableName].splice(index, 1)[0];
   };
-  
+
   const deleteMany = async (args = {}) => {
     const originalLen = db[tableName].length;
     if (!args.where || Object.keys(args.where).length === 0) {
       db[tableName] = [];
     } else {
-      db[tableName] = db[tableName].filter(item => {
-        for (const [key, value] of Object.entries(args.where)) {
-          if (item[key] !== value) return true;
-        }
-        return false;
-      });
+      db[tableName] = db[tableName].filter(item => !evalWhere(item, args.where, tableName));
     }
     return { count: originalLen - db[tableName].length };
   };
 
   const createMany = async (args = {}) => {
-    const newItems = args.data.map(d => ({
+    const newItems = (args.data || []).map(d => ({
       id: d.id || `${tableName}-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...d
+      ...d,
     }));
     db[tableName].push(...newItems);
     return { count: newItems.length };
@@ -516,7 +531,6 @@ const makeMockModel = (tableName) => {
     return create({ data: { ...args.where, ...args.create } });
   };
 
-  // groupBy — minimal mock: group by a single field and count
   const groupBy = async (args = {}) => {
     const records = await findMany({ where: args.where });
     const groupField = args.by && args.by[0];
@@ -527,7 +541,21 @@ const makeMockModel = (tableName) => {
       if (!groups[key]) groups[key] = { [groupField]: key, _count: { _all: 0 } };
       groups[key]._count._all += 1;
     });
-    return Object.values(groups);
+    let result = Object.values(groups);
+    if (args.orderBy) {
+      const ob = Array.isArray(args.orderBy) ? args.orderBy[0] : args.orderBy;
+      if (ob) {
+        const key = Object.keys(ob)[0];
+        const dir = ob[key];
+        result.sort((a, b) => {
+          const av = key.startsWith('_count') ? a._count._all : a[key];
+          const bv = key.startsWith('_count') ? b._count._all : b[key];
+          return dir === 'desc' ? bv - av : av - bv;
+        });
+      }
+    }
+    if (args.take) result = result.slice(0, args.take);
+    return result;
   };
 
   return {
@@ -545,35 +573,26 @@ const makeMockModel = (tableName) => {
   };
 };
 
-// Construct Mock Prisma API object
+// ─── Construct Mock Prisma API ─────────────────────────────────────────────────
 const mockPrisma = {
   admin: makeMockModel('admin'),
-  category: makeMockModel('category'),
-  printSize: makeMockModel('printSize'),
-  frame: makeMockModel('frame'),
-  printFinish: makeMockModel('printFinish'),
+  frameCategory: makeMockModel('frameCategory'),
+  frameMaterial: makeMockModel('frameMaterial'),
+  frameColor: makeMockModel('frameColor'),
+  frameSize: makeMockModel('frameSize'),
   glassOption: makeMockModel('glassOption'),
   mountOption: makeMockModel('mountOption'),
-  photo: makeMockModel('photo'),
-  collection: makeMockModel('collection'),
-  collectionPhoto: makeMockModel('collectionPhoto'),
-  testimonial: makeMockModel('testimonial'),
-  blog: makeMockModel('blog'),
-  settings: makeMockModel('settings'),
+  frameDesign: makeMockModel('frameDesign'),
+  frameReview: makeMockModel('frameReview'),
+  inquiry: makeMockModel('inquiry'),
   service: makeMockModel('service'),
-  booking: makeMockModel('booking'),
-  clientGallery: makeMockModel('clientGallery'),
-  galleryImage: makeMockModel('galleryImage'),
+  testimonial: makeMockModel('testimonial'),
   newsletter: makeMockModel('newsletter'),
+  settings: makeMockModel('settings'),
   analytics: makeMockModel('analytics'),
-  
-  $transaction: async (promises) => {
-    return Promise.all(promises);
-  },
-  
-  $disconnect: async () => {
-    // No-op
-  }
+
+  $transaction: async (promises) => Promise.all(promises),
+  $disconnect: async () => {},
 };
 
 module.exports = mockPrisma;

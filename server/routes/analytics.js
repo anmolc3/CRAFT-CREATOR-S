@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { trackEvent, getAnalytics } = require('../controllers/analyticsController');
+const { getDashboardStats, trackEvent } = require('../controllers/analyticsController');
 const { protect } = require('../middleware/auth');
 
+router.get('/dashboard', protect, getDashboardStats);
 router.post('/track', trackEvent);
-router.get('/', protect, getAnalytics);
 
 module.exports = router;

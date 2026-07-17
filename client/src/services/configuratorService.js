@@ -1,58 +1,25 @@
 import api from './api';
 
-export const finishService = {
-  getAll: async () => {
-    const { data } = await api.get('/finishes');
-    return data;
-  },
-  create: async (payload) => {
-    const { data } = await api.post('/finishes', payload);
-    return data;
-  },
-  update: async (id, payload) => {
-    const { data } = await api.put(`/finishes/${id}`, payload);
-    return data;
-  },
-  delete: async (id) => {
-    const { data } = await api.delete(`/finishes/${id}`);
-    return data;
-  },
-};
+export const configuratorService = {
+  getConfigOptions: () => api.get('/configurator'),
+  getSizes: () => api.get('/configurator/sizes'),
+  getGlassOptions: () => api.get('/configurator/glass'),
+  getMountOptions: () => api.get('/configurator/mount'),
+  getMaterials: () => api.get('/configurator/materials'),
+  getColors: () => api.get('/configurator/colors'),
 
-export const glassService = {
-  getAll: async () => {
-    const { data } = await api.get('/glass');
-    return data;
-  },
-  create: async (payload) => {
-    const { data } = await api.post('/glass', payload);
-    return data;
-  },
-  update: async (id, payload) => {
-    const { data } = await api.put(`/glass/${id}`, payload);
-    return data;
-  },
-  delete: async (id) => {
-    const { data } = await api.delete(`/glass/${id}`);
-    return data;
-  },
-};
+  // Admin CRUD for sizes
+  createSize: (data) => api.post('/configurator/sizes', data),
+  updateSize: (id, data) => api.put(`/configurator/sizes/${id}`, data),
+  deleteSize: (id) => api.delete(`/configurator/sizes/${id}`),
 
-export const mountService = {
-  getAll: async () => {
-    const { data } = await api.get('/mount');
-    return data;
-  },
-  create: async (payload) => {
-    const { data } = await api.post('/mount', payload);
-    return data;
-  },
-  update: async (id, payload) => {
-    const { data } = await api.put(`/mount/${id}`, payload);
-    return data;
-  },
-  delete: async (id) => {
-    const { data } = await api.delete(`/mount/${id}`);
-    return data;
-  },
+  // Admin CRUD for glass options
+  createGlass: (data) => api.post('/configurator/glass', data),
+  updateGlass: (id, data) => api.put(`/configurator/glass/${id}`, data),
+  deleteGlass: (id) => api.delete(`/configurator/glass/${id}`),
+
+  // Admin CRUD for mount options
+  createMount: (data) => api.post('/configurator/mount', data),
+  updateMount: (id, data) => api.put(`/configurator/mount/${id}`, data),
+  deleteMount: (id) => api.delete(`/configurator/mount/${id}`),
 };

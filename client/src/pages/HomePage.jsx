@@ -1,484 +1,391 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronDown, Star, Quote, Camera, Award, Globe, ShoppingBag, Folder } from 'lucide-react';
-import { photoService } from '../services/photoService';
-import { collectionService } from '../services/collectionService';
+import { motion } from 'framer-motion';
+import { ArrowRight, Star, ShieldCheck, HelpCircle, PhoneCall, Truck, Paintbrush, Sliders } from 'lucide-react';
+import { frameService } from '../services/frameService';
+import { serviceService } from '../services/serviceService';
+import { testimonialService } from '../services/testimonialService';
+import { FrameSkeleton } from '../components/common/SkeletonLoader';
+import { WhatsAppIcon } from '../components/common/WhatsAppButton';
+import { StarRating } from '../components/common/StarRating';
 
-const SERVICES = [
-  { icon: Camera, title: 'Portrait Sessions', desc: 'Intimate, editorial-grade portraits that capture your authentic self.' },
-  { icon: Globe, title: 'Travel & Landscape', desc: 'Fine art landscape photography from the Himalayas to the Sahara.' },
-  { icon: Award, title: 'Wildlife Safaris', desc: 'Guided wildlife photography expeditions across India and Africa.' },
-  { icon: ShoppingBag, title: 'Print Store', desc: 'Museum-quality fine art prints, custom framed and delivered to your door.', link: '/services' },
-];
+const MotionLink = motion(Link);
 
-const TESTIMONIALS = [
-  { name: 'Priya Sharma', role: 'Art Collector, Delhi', quote: 'The print quality is extraordinary — it transformed my living room into a gallery. Sikhar\'s eye for light is unmatched.', rating: 5 },
-  { name: 'James Harlow', role: 'Interior Designer, London', quote: 'I\'ve sourced artwork from galleries worldwide. Sikhar\'s limited editions are among the finest I\'ve encountered.', rating: 5 },
-  { name: 'Meera Nair', role: 'Wedding Client, Mumbai', quote: 'Our wedding photographs are breathtaking. He captured moments we didn\'t even know were happening.', rating: 5 },
-];
-
-const STATS = [
-  { value: '12+', label: 'Years of Experience' },
-  { value: '6', label: 'Continents Explored' },
-  { value: '500+', label: 'Prints Sold' },
-  { value: '40+', label: 'Awards Won' },
-];
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94], delay },
-  }),
-};
-
-const HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1600&q=90',
-  'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1600&q=90',
-  'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1600&q=90',
-  'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1600&q=90'
-];
-
-// ─── Hero Section ─────────────────────────────────────────────────────────────
-const Hero = () => {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
-  const [currentWord, setCurrentWord] = useState(0);
-  const words = ['Light', 'Moments', 'Stories', 'Eternity'];
-
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  useEffect(() => {
-    const wordInterval = setInterval(() => {
-      setCurrentWord(prev => (prev + 1) % words.length);
-    }, 2500);
-
-    const imageInterval = setInterval(() => {
-      setCurrentImageIndex(prev => (prev + 1) % HERO_IMAGES.length);
-    }, 6000);
-
-    return () => {
-      clearInterval(wordInterval);
-      clearInterval(imageInterval);
-    };
-  }, []);
-
-  return (
-    <section ref={ref} className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
-      <motion.div style={{ y }} className="absolute inset-0 z-0">
-        <AnimatePresence>
-          <motion.img
-            key={currentImageIndex}
-            src={HERO_IMAGES[currentImageIndex]}
-            alt="Hero background"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 2.0, ease: 'easeInOut' }}
-            className="absolute inset-0 w-full h-full object-cover"
-            draggable={false}
-          />
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70 z-10" />
-      </motion.div>
-
-      <motion.div style={{ opacity }} className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">
-        <motion.span variants={fadeUp} initial="hidden" animate="visible" custom={0} className="inline-block text-accent text-xs tracking-[0.4em] uppercase font-body font-medium mb-6">
-          Fine Art Photography
-        </motion.span>
-
-        <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={0.15} className="font-display text-6xl md:text-8xl font-bold leading-[1.05] mb-4">
-          Capturing{' '}
-          <span className="relative inline-block min-w-[220px] md:min-w-[340px]">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={currentWord}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4 }}
-                className="gradient-text absolute left-0"
-              >
-                {words[currentWord]}
-              </motion.span>
-            </AnimatePresence>
-            &nbsp;
-          </span>
-        </motion.h1>
-
-        <motion.p variants={fadeUp} initial="hidden" animate="visible" custom={0.3} className="text-white/75 text-lg md:text-xl font-light font-body max-w-2xl mx-auto mb-10 leading-relaxed">
-          Museum-quality fine art prints from India and beyond — landscapes, wildlife, and the poetry of the natural world.
-        </motion.p>
-
-        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.45} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="#portfolio" className="btn-gold">
-            Explore Portfolio <ArrowRight size={16} />
-          </a>
-          <Link to="/book" className="btn-ghost text-white border border-white/30 hover:border-white hover:bg-white/10 px-8 py-3.5">
-            Book a Session <ArrowRight size={16} />
-          </Link>
-        </motion.div>
-      </motion.div>
-
-      <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 text-white/50 flex flex-col items-center gap-2">
-        <span className="text-[10px] tracking-[0.3em] uppercase font-body">Scroll</span>
-        <ChevronDown size={18} />
-      </motion.div>
-    </section>
-  );
-};
-
-// ─── Stats Bar ────────────────────────────────────────────────────────────────
-const StatsBar = () => (
-  <section className="bg-primary text-white py-10">
-    <div className="container-luxury grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-      {STATS.map((stat, i) => (
-        <motion.div key={stat.label} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i * 0.1}>
-          <p className="font-display text-4xl text-accent mb-1">{stat.value}</p>
-          <p className="text-white/50 text-xs tracking-widest uppercase font-body">{stat.label}</p>
-        </motion.div>
-      ))}
-    </div>
-  </section>
-);
-
-// ─── Curated Collections ──────────────────────────────────────────────────────
-const CuratedCollections = ({ collections }) => (
-  <section className="py-20 bg-[#f9f9f9]">
-    <div className="container-luxury">
-      <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-12">
-        <span className="text-accent text-xs tracking-[0.35em] uppercase font-body font-medium block mb-3">Series & Collections</span>
-        <h2 className="section-heading text-4xl md:text-5xl">Curated Series</h2>
-      </motion.div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {collections.map((col, i) => (
-          <motion.div
-            key={col.id}
-            variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i * 0.1}
-            className="group relative h-80 overflow-hidden bg-primary shadow-luxury"
-          >
-            {col.imageUrl ? (
-              <img src={col.imageUrl} alt={col.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-primary to-secondary" />
-            )}
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
-            <div className="absolute inset-0 flex flex-col justify-end p-6 text-white z-10">
-              <span className="text-[10px] tracking-widest text-accent uppercase font-semibold mb-2 flex items-center gap-1.5">
-                <Folder size={12} /> {col._count?.photos || 0} Photographs
-              </span>
-              <h3 className="font-display text-2xl text-white mb-2">{col.name}</h3>
-              <p className="text-white/60 text-xs font-body font-light line-clamp-2 mb-4">{col.description}</p>
-              <Link to={`/collections/${col.slug}`} className="text-white text-xs tracking-widest uppercase font-semibold inline-flex items-center gap-2 group-hover:gap-3 transition-all">
-                Explore Series <ArrowRight size={14} />
-              </Link>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-// ─── Featured Gallery ─────────────────────────────────────────────────────────
-const FeaturedGallery = ({ photos }) => {
-  const [hovered, setHovered] = useState(null);
-
-  return (
-    <section id="portfolio" className="py-24 bg-background">
-      <div className="container-luxury">
-        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
-          <div>
-            <span className="text-accent text-xs tracking-[0.35em] uppercase font-body font-medium block mb-3">Portfolio</span>
-            <h2 className="section-heading text-4xl md:text-5xl">Selected Works</h2>
-          </div>
-        </motion.div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {photos.map((item, i) => (
-            <motion.div
-              key={item.id}
-              variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i * 0.08}
-              className={`photo-card group relative ${item.orientation === 'portrait' ? 'row-span-2' : ''}`}
-              onMouseEnter={() => setHovered(item.id)}
-              onMouseLeave={() => setHovered(null)}
-            >
-              <Link to={`/photos/${item.slug}`}>
-                <div className={`overflow-hidden ${item.orientation === 'portrait' ? 'aspect-[3/4]' : 'aspect-[4/3]'}`}>
-                  <motion.img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="w-full h-full object-cover no-drag no-select"
-                    animate={{ scale: hovered === item.id ? 1.06 : 1 }}
-                    transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    draggable={false}
-                    onContextMenu={e => e.preventDefault()}
-                  />
-                </div>
-                <div className="photo-card-overlay">
-                  <motion.div
-                    className="p-5 w-full"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: hovered === item.id ? 1 : 0, y: hovered === item.id ? 0 : 10 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <p className="text-white/60 text-[10px] tracking-widest uppercase font-body mb-1">
-                      {item.category?.name || 'Fine Art'}
-                    </p>
-                    <p className="text-white font-display text-lg">{item.title}</p>
-                    <p className="text-white/80 text-xs font-body mt-1">₹{item.basePrice?.toLocaleString('en-IN')}</p>
-                  </motion.div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// ─── Services Section ─────────────────────────────────────────────────────────
-const ServicesSection = () => (
-  <section className="py-24 bg-primary text-white">
-    <div className="container-luxury">
-      <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-        <span className="text-accent text-xs tracking-[0.35em] uppercase font-body font-medium block mb-3">What I Offer</span>
-        <h2 className="font-display text-4xl md:text-5xl text-white mb-4">Services & Prints</h2>
-        <p className="text-white/50 max-w-xl mx-auto text-base font-light leading-relaxed">
-          From commissioned shoots to museum-quality prints delivered to your home — every service crafted with obsessive attention to detail.
-        </p>
-      </motion.div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {SERVICES.map((s, i) => (
-          <motion.div key={s.title} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i * 0.1} className="glass p-8 group hover:bg-white/10 transition-all duration-500 cursor-default">
-            <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-              <s.icon size={22} className="text-accent" />
-            </div>
-            <h3 className="font-display text-xl text-white mb-3">{s.title}</h3>
-            <p className="text-white/50 text-sm leading-relaxed font-light">{s.desc}</p>
-            {s.link && (
-              <Link to={s.link} className="inline-flex items-center gap-2 text-accent text-xs tracking-widest uppercase mt-5 hover:gap-3 transition-all">
-                Explore <ArrowRight size={13} />
-              </Link>
-            )}
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-// ─── About / Philosophy Section ───────────────────────────────────────────────
-const AboutSection = () => (
-  <section className="py-24 bg-background">
-    <div className="container-luxury">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="relative">
-          <div className="aspect-[4/5] overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1554080353-a576cf803bda?w=800&q=80"
-              alt="Photographer at work"
-              className="w-full h-full object-cover no-drag no-select"
-              draggable={false}
-              onContextMenu={e => e.preventDefault()}
-            />
-          </div>
-          <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-accent/10 border border-accent/20 -z-10" />
-          <div className="absolute -top-6 -left-6 w-24 h-24 bg-primary/5 border border-primary/10 -z-10" />
-        </motion.div>
-
-        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0.2}>
-          <span className="text-accent text-xs tracking-[0.35em] uppercase font-body font-medium block mb-4">The Artist</span>
-          <h2 className="section-heading text-4xl md:text-5xl mb-8">Obsessed With<br />Perfect Light</h2>
-          <p className="text-primary-600 leading-relaxed mb-5 text-base">
-            I'm Sikhar — an award-winning fine art photographer based in Mumbai. For over a decade, I've chased extraordinary light from the Himalayas to the Sahara, from Arctic fjords to the jungles of Central India.
-          </p>
-          <p className="text-primary-600 leading-relaxed mb-5 text-base">
-            My work is about more than pressing a shutter — it's about patience, presence, and returning home with something that stops people mid-step. Every limited-edition print is personally reviewed, signed, and shipped in museum archival packaging.
-          </p>
-          <p className="text-primary-600 leading-relaxed mb-10 text-base">
-            My prints are held in private collections across six continents, and I've exhibited in galleries in London, New York, Mumbai, and Singapore.
-          </p>
-          <Link to="/book" className="btn-primary">
-            Commission a Shoot <ArrowRight size={15} />
-          </Link>
-        </motion.div>
-      </div>
-    </div>
-  </section>
-);
-
-// ─── Print Store CTA ─────────────────────────────────────────────────────────
-const PrintStoreCTA = () => (
-  <section className="relative py-32 overflow-hidden">
-    <div className="absolute inset-0 z-0">
-      <img
-        src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&q=80"
-        alt="Fine art print"
-        className="w-full h-full object-cover no-drag"
-        draggable={false}
-        onContextMenu={e => e.preventDefault()}
-      />
-      <div className="absolute inset-0 bg-black/70" />
-    </div>
-    <div className="relative z-10 container-luxury text-center text-white">
-      <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-        <span className="text-accent text-xs tracking-[0.4em] uppercase font-body font-medium block mb-4">Fine Art Prints</span>
-        <h2 className="font-display text-5xl md:text-7xl mb-6 leading-tight">
-          Own a Piece of<br />the World
-        </h2>
-        <p className="text-white/60 text-lg max-w-2xl mx-auto mb-10 font-light leading-relaxed">
-          Limited-edition prints on Hahnemühle Fine Art paper. Custom framing options. Each print numbered, signed, and delivered with a certificate of authenticity. Order via WhatsApp — it's that simple.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="#portfolio" className="btn-gold">
-            Browse the Store <ShoppingBag size={16} />
-          </a>
-          <Link to="/book" className="btn-ghost text-white border border-white/30 hover:bg-white/10 hover:border-white px-8 py-3.5">
-            Custom Order <ArrowRight size={16} />
-          </Link>
-        </div>
-      </motion.div>
-    </div>
-  </section>
-);
-
-// ─── Testimonials ─────────────────────────────────────────────────────────────
-const Testimonials = () => (
-  <section className="py-24 bg-background">
-    <div className="container-luxury">
-      <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-        <span className="text-accent text-xs tracking-[0.35em] uppercase font-body font-medium block mb-3">Testimonials</span>
-        <h2 className="font-display text-4xl md:text-5xl text-primary">What Collectors Say</h2>
-      </motion.div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {TESTIMONIALS.map((t, i) => (
-          <motion.div key={t.name} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i * 0.12} className="luxury-card p-8 relative">
-            <Quote size={32} className="text-accent/20 absolute top-6 right-6" />
-            <div className="flex gap-1 mb-5">
-              {Array.from({ length: t.rating }).map((_, j) => (
-                <Star key={j} size={14} className="fill-accent text-accent" />
-              ))}
-            </div>
-            <p className="text-primary-600 text-sm leading-relaxed mb-6 italic">"{t.quote}"</p>
-            <div>
-              <p className="font-body font-semibold text-primary text-sm">{t.name}</p>
-              <p className="text-primary-400 text-xs font-body mt-0.5">{t.role}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-// ─── Newsletter CTA ───────────────────────────────────────────────────────────
-const Newsletter = () => {
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!email) return;
-    setSubmitted(true);
-  };
-
-  return (
-    <section className="py-20 bg-primary-50 border-y border-primary-100">
-      <div className="container-luxury text-center max-w-2xl mx-auto">
-        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-          <span className="text-accent text-xs tracking-[0.35em] uppercase font-body font-medium block mb-3">Stay in Touch</span>
-          <h2 className="font-display text-3xl md:text-4xl text-primary mb-4">New Prints. First Access.</h2>
-          <p className="text-primary-500 text-sm mb-8 leading-relaxed">
-            Join the collector's list — be the first to know about new limited-edition releases and behind-the-scenes dispatches from the field.
-          </p>
-          {submitted ? (
-            <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-accent font-body font-medium tracking-wide">
-              ✓ You're on the list. Thank you.
-            </motion.p>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Your email address"
-                required
-                className="form-input flex-1"
-              />
-              <button type="submit" className="btn-primary whitespace-nowrap">
-                Subscribe
-              </button>
-            </form>
-          )}
-        </motion.div>
-      </div>
-    </section>
-  );
-};
-
-// ─── Home Page ────────────────────────────────────────────────────────────────
 const HomePage = () => {
-  const [photos, setPhotos] = useState([]);
-  const [collections, setCollections] = useState([]);
+  const [featuredFrames, setFeaturedFrames] = useState([]);
+  const [services, setServices] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState('');
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
   useEffect(() => {
-    const load = async () => {
+    const fetchData = async () => {
       try {
-        const [photoRes, collectionRes] = await Promise.all([
-          photoService.getAll({ limit: 12, status: 'published' }),
-          collectionService.getAll(),
+        const [framesRes, servicesRes, testRes] = await Promise.all([
+          frameService.getFrames({ featured: 'true', limit: 4 }),
+          serviceService.getServices(),
+          testimonialService.getTestimonials(),
         ]);
-        // Deduplicate by id in case the API returns duplicates
-        const rawPhotos = photoRes.data || [];
-        const seen = new Set();
-        const uniquePhotos = rawPhotos.filter(p => {
-          if (seen.has(p.id)) return false;
-          seen.add(p.id);
-          return true;
-        });
-        setPhotos(uniquePhotos);
-        setCollections(collectionRes.data || []);
-      } catch (e) {
-        console.error(e);
+        setFeaturedFrames(framesRes.data.data || []);
+        setServices(servicesRes.data.data || []);
+        setTestimonials(testRes.data.data?.filter(t => t.featured).slice(0, 3) || []);
+      } catch (err) {
+        console.error('Error fetching homepage data:', err);
       } finally {
         setLoading(false);
       }
     };
-    load();
+    fetchData();
   }, []);
 
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (email) {
+      setNewsletterSubscribed(true);
+      setEmail('');
+    }
+  };
+
   return (
-    <div>
-      <Hero />
-      <StatsBar />
-      {collections.length > 0 && <CuratedCollections collections={collections} />}
-      {loading ? (
-        <div className="container-luxury py-20 text-center">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="skeleton aspect-[4/3]" />
-            ))}
+    <div className="space-y-24 pb-20">
+      
+      {/* ── Luxury Hero Section ── */}
+      <section className="relative h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-primary text-white">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1600&q=80"
+            alt="Custom Framed Art on Wall"
+            className="w-full h-full object-cover opacity-35"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-primary" />
+        </div>
+
+        <div className="relative z-10 max-w-5xl mx-auto px-6 text-center space-y-8">
+          <motion.span 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-block text-accent text-xs tracking-[0.4em] uppercase font-semibold"
+          >
+            Premium Photo Framing Studio
+          </motion.span>
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.15 }}
+            className="font-display text-4xl sm:text-6xl md:text-7xl font-bold leading-tight tracking-wide"
+          >
+            Frame Your Memories, <br />
+            <span className="text-accent italic font-light font-serif">Forever.</span>
+          </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-white/70 max-w-2xl mx-auto text-sm sm:text-base md:text-lg font-light leading-relaxed"
+          >
+            Bring your physical prints or upload them digitally. Select from our curated collection of 40+ handcrafted wooden and metal styles. Hand-assembled with museum-grade precision.
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.45 }}
+            className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4"
+          >
+            <MotionLink 
+              to="/frames"
+              whileHover={{ scale: 1.06, y: -2, boxShadow: '0 10px 25px -5px rgba(249, 168, 212, 0.4)' }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              className="w-full sm:w-auto border border-accent text-accent hover:bg-accent hover:text-primary px-8 py-4 rounded-full font-semibold tracking-widest uppercase text-xs transition-all duration-300 text-center"
+            >
+              Explore Collection
+            </MotionLink>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Why Choose Us (Luxury Features) ── */}
+      <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="p-6 bg-white border border-[#eaeaea] rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 space-y-4">
+          <div className="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent">
+            <ShieldCheck size={20} />
+          </div>
+          <h3 className="font-display text-lg font-bold text-primary">Museum Quality</h3>
+          <p className="text-primary/60 text-xs leading-relaxed font-light">
+            We use acid-free backing materials, premium mat board, and museum-grade glass to preserve your memories from degradation and UV light.
+          </p>
+        </div>
+
+        <div className="p-6 bg-white border border-[#eaeaea] rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 space-y-4">
+          <div className="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent">
+            <Paintbrush size={20} />
+          </div>
+          <h3 className="font-display text-lg font-bold text-primary">Expert Craftsmanship</h3>
+          <p className="text-primary/60 text-xs leading-relaxed font-light">
+            Every frame is hand-jointed, sanded, and assembled in our custom workshop. Corners are checked for perfect alignment.
+          </p>
+        </div>
+
+        <div className="p-6 bg-white border border-[#eaeaea] rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 space-y-4">
+          <div className="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent">
+            <Sliders size={20} />
+          </div>
+          <h3 className="font-display text-lg font-bold text-primary">Total Customization</h3>
+          <p className="text-primary/60 text-xs leading-relaxed font-light">
+            Choose details like width, frame style, anti-glare glass, colored mounts, or custom dimensions. Built exact to your specifications.
+          </p>
+        </div>
+
+        <div className="p-6 bg-white border border-[#eaeaea] rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 space-y-4">
+          <div className="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent">
+            <Truck size={20} />
+          </div>
+          <h3 className="font-display text-lg font-bold text-primary">Secure Logistics</h3>
+          <p className="text-primary/60 text-xs leading-relaxed font-light">
+            We package each custom frame in triple-layered bubble wrap and rigid wooden crates to ensure it arrives in pristine gallery condition.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Featured Collection ── */}
+      <section className="max-w-7xl mx-auto px-6 space-y-12">
+        <div className="text-center space-y-3">
+          <span className="text-accent text-[10px] tracking-[0.3em] font-semibold uppercase block">Curated Selection</span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-primary">Popular Frame Designs</h2>
+          <div className="h-[2px] w-12 bg-accent mx-auto" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {loading ? (
+            Array(4).fill(0).map((_, i) => <FrameSkeleton key={i} />)
+          ) : (
+            featuredFrames.map((frame) => (
+              <div 
+                key={frame.id}
+                className="bg-white rounded-2xl overflow-hidden shadow-card border border-[#eaeaea] group flex flex-col justify-between transition-all duration-500 h-full hover:shadow-card-hover"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 border-b border-[#f1f1f1]">
+                  <img 
+                    src={frame.imageUrl} 
+                    alt={frame.name}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  {frame.category && (
+                    <span className="absolute top-4 left-4 bg-primary/95 text-white text-[9px] tracking-widest uppercase px-3 py-1.5 rounded-full font-semibold">
+                      {frame.category.name}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="text-[9px] tracking-widest text-accent font-bold uppercase mb-1">{frame.material}</div>
+                    <h3 className="font-display text-lg font-bold text-primary group-hover:text-accent transition-colors">
+                      <Link to={`/frames/${frame.slug}`}>{frame.name}</Link>
+                    </h3>
+                    <p className="text-primary/60 text-xs mt-2 line-clamp-2 leading-relaxed font-light">{frame.description}</p>
+                  </div>
+                  
+                  <div className="pt-4 flex justify-between items-center border-t border-[#f5f5f5] mt-4">
+                    <div>
+                      <span className="text-[9px] uppercase text-primary/40 tracking-widest block">Starting Price</span>
+                      <span className="font-display text-base font-bold text-primary">₹{frame.basePrice}</span>
+                    </div>
+                    <Link 
+                      to={`/configure?frame=${frame.slug}`}
+                      className="bg-primary hover:bg-accent text-white hover:text-primary px-4 py-2 rounded-full text-[9px] font-semibold tracking-widest uppercase transition-all duration-300"
+                    >
+                      Frame Now
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="text-center pt-4">
+          <Link 
+            to="/frames" 
+            className="inline-flex items-center gap-2 text-primary hover:text-accent font-semibold tracking-widest uppercase text-xs transition-colors"
+          >
+            View Full Catalog <ArrowRight size={14} />
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Before & After Frame Visualizer ── */}
+      <section className="bg-primary text-white py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <span className="text-accent text-[10px] tracking-[0.3em] font-semibold uppercase block">The Magic of Framing</span>
+            <h2 className="font-display text-3xl md:text-5xl font-bold leading-tight">See the Transformation</h2>
+            <p className="text-white/70 font-light text-sm md:text-base leading-relaxed">
+              Unframed artwork can fade, bend, and feel incomplete on a wall. A premium handcrafted frame adds weight, structure, protection, and turns a simple print into a grand visual statement.
+            </p>
+            <div className="pt-4">
+              <Link 
+                to="/configure"
+                className="bg-accent text-primary hover:bg-white px-8 py-3.5 rounded-full font-semibold tracking-widest uppercase text-xs transition-all duration-300 shadow-luxury"
+              >
+                Try the Visual Configurator
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <span className="text-xs uppercase text-white/50 tracking-widest block text-center">Plain Print</span>
+              <div className="aspect-[3/4] bg-white p-3 shadow-luxury flex items-center justify-center rounded-lg">
+                <img 
+                  src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=400&q=80" 
+                  alt="Plain Print" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <span className="text-xs uppercase text-accent tracking-widest block text-center">Craft Creator's Frame</span>
+              <div className="aspect-[3/4] bg-white p-2 flex items-center justify-center rounded-lg shadow-luxury-lg relative">
+                {/* Visual Representation of Frame Border */}
+                <div className="w-full h-full border-[18px] border-primary p-3 bg-white flex items-center justify-center">
+                  <img 
+                    src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=400&q=80" 
+                    alt="Framed Print" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      ) : (
-        photos.length > 0 && <FeaturedGallery photos={photos} />
+      </section>
+
+      {/* ── Framing Services ── */}
+      <section className="max-w-7xl mx-auto px-6 space-y-12">
+        <div className="text-center space-y-3">
+          <span className="text-accent text-[10px] tracking-[0.3em] font-semibold uppercase block">Expert Options</span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-primary">Specialized Framing Services</h2>
+          <div className="h-[2px] w-12 bg-accent mx-auto" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.slice(0, 3).map((service) => (
+            <div 
+              key={service.id}
+              className="bg-white border border-[#eaeaea] rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 space-y-4 flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <span className="inline-block text-[9px] font-bold text-accent uppercase tracking-widest bg-accent/5 px-3 py-1 rounded-full">
+                  {service.duration}
+                </span>
+                <h3 className="font-display text-xl font-bold text-primary">{service.title}</h3>
+                <p className="text-primary/60 text-xs font-light leading-relaxed line-clamp-3">{service.description}</p>
+              </div>
+              <div className="pt-6 flex justify-between items-center border-t border-[#f5f5f5] mt-6">
+                <span className="text-xs font-semibold text-primary">Starting ₹{service.startingPrice}</span>
+                <Link 
+                  to={`/services/${service.slug}`}
+                  className="text-primary hover:text-accent font-semibold tracking-widest uppercase text-[10px] transition-colors"
+                >
+                  Learn More &rarr;
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center">
+          <Link 
+            to="/services" 
+            className="inline-flex items-center gap-2 text-primary hover:text-accent font-semibold tracking-widest uppercase text-xs transition-colors"
+          >
+            View All Services &rarr;
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      {testimonials.length > 0 && (
+        <section className="bg-white border-t border-b border-[#eaeaea] py-20">
+          <div className="max-w-5xl mx-auto px-6 space-y-12">
+            <div className="text-center space-y-3">
+              <span className="text-accent text-[10px] tracking-[0.3em] font-semibold uppercase block">Reviews</span>
+              <h2 className="font-display text-3xl font-bold text-primary">What Our Clients Say</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {testimonials.map((test) => (
+                <div key={test.id} className="space-y-4 p-6 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col justify-between">
+                  <p className="text-primary/75 text-xs italic font-light leading-relaxed">
+                    "{test.quote}"
+                  </p>
+                  <div>
+                    <StarRating rating={test.rating} className="mb-2" />
+                    <h4 className="font-bold text-xs text-primary">{test.name}</h4>
+                    <span className="text-[10px] text-primary/40 uppercase tracking-widest">{test.title}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
-      <ServicesSection />
-      <AboutSection />
-      <PrintStoreCTA />
-      <Testimonials />
-      <Newsletter />
+
+      {/* ── Newsletter Subscription ── */}
+      <section className="max-w-4xl mx-auto px-6 bg-primary text-white rounded-3xl p-12 relative overflow-hidden shadow-luxury text-center space-y-6">
+        <span className="text-accent text-[10px] tracking-[0.3em] font-semibold uppercase block">Studio Updates</span>
+        <h2 className="font-display text-2xl md:text-3xl font-bold">Join Craft Creator's Circle</h2>
+        <p className="text-white/60 text-xs font-light max-w-md mx-auto leading-relaxed">
+          Subscribe for early access to framing design collections, seasonal maintenance tips, and special gallery features.
+        </p>
+
+        {newsletterSubscribed ? (
+          <p className="text-accent font-semibold text-xs tracking-wider uppercase">Thank you! You are now subscribed.</p>
+        ) : (
+          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto pt-4">
+            <input 
+              type="email" 
+              placeholder="Your email address" 
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 bg-white/10 border border-white/20 px-6 py-3.5 rounded-full text-xs placeholder-white/40 focus:outline-none focus:border-accent text-white"
+            />
+            <button 
+              type="submit"
+              className="bg-white hover:bg-accent text-primary py-3.5 px-8 rounded-full font-semibold tracking-widest uppercase text-xs transition-all duration-300 shadow-luxury"
+            >
+              Subscribe
+            </button>
+          </form>
+        )}
+      </section>
+
+      {/* ── WhatsApp Quick CTA ── */}
+      <section className="text-center space-y-4 py-10">
+        <h3 className="font-display text-2xl font-bold text-primary">Need a Quick Estimate?</h3>
+        <p className="text-primary/60 text-xs max-w-sm mx-auto font-light leading-relaxed">
+          Send us your dimensions or photo directly via WhatsApp and our master framers will give you an instant quote.
+        </p>
+        <div className="pt-2">
+          <a
+            href="https://wa.me/918077037277?text=Hello%2C%20I%20would%20like%20to%20get%20a%20price%20estimate%20for%20custom%20photo%20framing."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] text-white px-8 py-3.5 rounded-full font-semibold tracking-widest uppercase text-xs transition-all duration-300 shadow-luxury"
+          >
+            <WhatsAppIcon /> Instant WhatsApp Quote
+          </a>
+        </div>
+      </section>
+
     </div>
   );
 };

@@ -19,7 +19,8 @@
   :root {
     --color-primary: #111111;
     --color-secondary: #1F1F1F;
-    --color-accent: #D4AF37;
+    --color-accent: #F9A8D4;
+    --color-babyblue: #93C5FD;
     --color-background: #FAFAFA;
     --color-text: #333333;
     --color-white: #FFFFFF;
@@ -102,9 +103,13 @@
 
   .btn-gold {
     @apply inline-flex items-center justify-center gap-2 px-8 py-3.5
-           bg-accent text-primary font-body font-medium text-sm tracking-widest uppercase
-           transition-all duration-300 hover:shadow-gold hover:scale-[1.02]
+           text-primary font-body font-medium text-sm tracking-widest uppercase
+           transition-all duration-300 hover:scale-[1.02]
            focus-visible:outline-2 focus-visible:outline-accent;
+    background: linear-gradient(135deg, var(--color-accent), var(--color-babyblue));
+  }
+  .btn-gold:hover {
+    box-shadow: 0 4px 30px rgba(249, 168, 212, 0.4);
   }
 
   .btn-ghost {
@@ -121,7 +126,8 @@
 
   .section-heading::after {
     content: '';
-    @apply block w-12 h-0.5 bg-accent mt-4;
+    @apply block w-12 h-0.5 mt-4;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-babyblue));
   }
 
   .section-heading.center::after {
@@ -307,7 +313,7 @@
 
   /* Gradient text */
   .gradient-text {
-    background: linear-gradient(135deg, #D4AF37, #b8960a);
+    background: linear-gradient(135deg, #F9A8D4, #93C5FD);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

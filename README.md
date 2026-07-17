@@ -1,14 +1,14 @@
-# Sikhar — Fine Art Photography Portfolio & Print Store
+# Craft Creator's — Premium Custom Photo Framing Studio
 
-A luxury photographer portfolio and fine art print store. Customers configure custom framed prints and place orders via **WhatsApp** — no payment gateway required.
+A premium, luxury Custom Photo Framing Studio website. Customers upload digital copies of their photo or choose "I will bring a printed copy", configure frame borders, materials, glass properties, and mounts, and submit custom framing inquiries directly via **WhatsApp** — no payment gateway required.
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite, Tailwind CSS, Framer Motion, React Router DOM |
+| Frontend | React 19, Vite, Tailwind CSS, Framer Motion, React Router DOM, React Hook Form |
 | Backend | Node.js, Express.js, Prisma ORM |
-| Database | PostgreSQL (local) |
+| Database | PostgreSQL (Local) / Mock in-memory DB fallback |
 | Auth | JWT + bcrypt |
 | Images | Local disk (`server/uploads/`) |
 | Orders | WhatsApp (wa.me) |
@@ -21,7 +21,7 @@ A luxury photographer portfolio and fine art print store. Customers configure cu
 photo-web/
 ├── client/          # React 19 + Vite frontend
 ├── server/          # Node.js + Express backend
-│   └── uploads/     # Uploaded images (served as static files)
+│   └── uploads/     # Customer image uploads (stored inside server/uploads/inquiries)
 └── README.md
 ```
 
@@ -30,13 +30,13 @@ photo-web/
 ## Prerequisites
 
 - Node.js 18+
-- PostgreSQL 14+ running locally
+- PostgreSQL 14+ running locally (optional if using `USE_MOCK_DB=true`)
 
 ---
 
 ## Local Setup
 
-### 1. Clone & Install
+### 1. Install Dependencies
 
 ```bash
 # Install server dependencies
@@ -50,104 +50,79 @@ npm install
 
 ### 2. Configure Environment Variables
 
-**Server** — copy `server/.env.example` to `server/.env`:
-
-```bash
-cp server/.env.example server/.env
-```
-
-Edit `server/.env`:
+**Server** — edit `server/.env`:
 
 ```env
 DATABASE_URL="postgresql://postgres:password@localhost:5432/sikhar_photography"
-JWT_SECRET="change-this-to-a-long-random-secret"
+JWT_SECRET="9a7f3b8c2d1e0f9a8b7c6d5e4f3a2b1c"
 JWT_EXPIRES_IN="7d"
 PORT=5000
 NODE_ENV=development
 CLIENT_URL=http://localhost:5173
+USE_MOCK_DB=true
 ```
 
-**Client** — copy `client/.env.example` to `client/.env`:
+> [!NOTE]
+> Since `USE_MOCK_DB=true` is enabled, the backend will run using an in-memory mock database hydrated from seed parameters. No PostgreSQL configuration is required for local running!
 
-```bash
-cp client/.env.example client/.env
-```
-
-`client/.env` (defaults are already correct for local dev):
+**Client** — edit `client/.env`:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
-VITE_WHATSAPP_NUMBER=919876543210
-VITE_PHOTOGRAPHER_NAME=Sikhar
 ```
 
-### 3. Set Up Database
+### 3. Run Development Servers
 
-```bash
-cd server
-
-# Generate Prisma client
-npx prisma generate
-
-# Run migrations
-npx prisma migrate dev --name init
-
-# Seed with sample data (photos, categories, collections, etc.)
-npx prisma db seed
-```
-
-### 4. Run Development Servers
-
-Open **two terminals**:
+Open **two separate terminals**:
 
 **Terminal 1 — Backend:**
 ```bash
 cd server
 npm run dev
-# Runs on http://localhost:5000
+# Runs API server on http://localhost:5000
 ```
 
 **Terminal 2 — Frontend:**
 ```bash
 cd client
 npm run dev
-# Runs on http://localhost:5173
+# Runs client dashboard on http://localhost:5173
 ```
 
 ---
 
 ## Admin Dashboard
 
-After seeding, log in at `http://localhost:5173/admin/login` with:
+Log in at `http://localhost:5173/admin/login` with:
 
 ```
-Email:    admin@sikhar.photography
+Email:    admin@craftcreators.in
 Password: Admin@1234
 ```
 
 ---
 
-## Image Uploads
+## Image Upload Protection & Storage
 
-Uploaded images are stored in `server/uploads/` and served as static files at:
+Customer-uploaded photograph files are securely validated (accepts JPG, PNG, WEBP, HEIC up to 15MB) and saved inside:
 
 ```
-http://localhost:5000/uploads/<filename>
+server/uploads/inquiries/
 ```
 
-No cloud storage account is required. To add cloud storage later, update `server/middleware/upload.js` and `server/config/storage.js` — no routes or controllers need to change.
+Served through Express static middleware for admin review at `http://localhost:5000/uploads/inquiries/<filename>`.
 
 ---
 
 ## WhatsApp Integration
 
-When a customer clicks **Order on WhatsApp**, the site generates a pre-filled message with their selected print options and opens:
+Once client specifications are submitted, the site generates a pre-formatted WhatsApp message detailing the selected frame profile, glass style, mat mounting, quantity, and print source option. Clicking the CTA directs to:
 
 ```
-https://wa.me/{VITE_WHATSAPP_NUMBER}?text={encoded_message}
+https://wa.me/918077037277?text={encoded_message}
 ```
 
-Set your WhatsApp number (with country code, no `+`) in `client/.env`.
+The studio number is configurable from the server settings.
 
 ---
 
@@ -155,23 +130,18 @@ Set your WhatsApp number (with country code, no `+`) in `client/.env`.
 
 | Method | Route | Description |
 |---|---|---|
-| POST | `/api/auth/login` | Admin login |
-| GET | `/api/photos` | List photos (paginated) |
-| GET | `/api/photos/:slug` | Single photo |
-| POST | `/api/photos` | Upload photo (admin) |
-| GET | `/api/categories` | All categories |
-| GET | `/api/collections` | All collections |
-| GET | `/api/frames` | Frame options |
-| GET | `/api/sizes` | Print sizes |
-| GET | `/api/testimonials` | Testimonials |
-| GET | `/api/blogs` | Blog posts |
-| POST | `/api/newsletter/subscribe` | Subscribe to newsletter |
-| GET | `/api/settings` | Site settings |
-| GET | `/api/analytics` | Analytics (admin) |
-| POST | `/api/analytics/track` | Track event |
+| POST | `/api/auth/login` | Admin login validation |
+| GET | `/api/frames` | Get frame catalogs |
+| GET | `/api/frames/:slug` | Get frame style details |
+| POST | `/api/inquiries` | Create customer inquiry (optional file upload) |
+| GET | `/api/inquiries` | List inquiries (admin) |
+| GET | `/api/configurator` | Get size/glass/mount settings |
+| GET | `/api/testimonials` | Get customer reviews |
+| POST | `/api/newsletter` | Subscribe to newsletter |
+| GET | `/api/settings` | Get studio configuration |
 
 ---
 
 ## License
 
-© Sikhar Photography. All rights reserved.
+© Craft Creator's Studio. All rights reserved.

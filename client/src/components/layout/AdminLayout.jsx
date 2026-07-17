@@ -1,58 +1,74 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
-import { Camera, Image as ImageIcon, Briefcase, Calendar, Users, Settings, LogOut, Folder, Sliders } from 'lucide-react';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { 
+  Briefcase, 
+  Settings, 
+  LogOut, 
+  Sliders, 
+  MessageSquare, 
+  Layers, 
+  Film, 
+  Mail, 
+  FileText, 
+  LayoutDashboard 
+} from 'lucide-react';
 
 const AdminLayout = () => {
+  const location = useLocation();
+
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
     window.location.href = '/admin/login';
   };
 
+  const navLinks = [
+    { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+    { name: 'Frame Catalog', path: '/admin/frames', icon: Film },
+    { name: 'Categories', path: '/admin/categories', icon: Layers },
+    { name: 'Inquiries', path: '/admin/inquiries', icon: MessageSquare },
+    { name: 'Services', path: '/admin/services', icon: Briefcase },
+    { name: 'Testimonials', path: '/admin/testimonials', icon: FileText },
+    { name: 'Newsletter', path: '/admin/newsletter', icon: Mail },
+    { name: 'Configurator Config', path: '/admin/config', icon: Sliders },
+    { name: 'Settings', path: '/admin/settings', icon: Settings },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#111] text-gray-300 font-body flex">
+    <div className="min-h-screen bg-[#0e0e0e] text-gray-300 font-body flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#1a1a1a] border-r border-[#2a2a2a] flex flex-col fixed inset-y-0 z-20">
-        <div className="p-6 border-b border-[#2a2a2a]">
-          <Link to="/admin" className="text-lg font-display text-white flex items-center gap-3">
-            <img src="/cc-logo.svg" alt="Craft Creator's Logo" className="h-8 w-8 object-contain rounded-full shadow-sm" />
-            <span>Admin Panel</span>
+      <aside className="w-64 bg-[#141414] border-r border-[#222222] flex flex-col fixed inset-y-0 z-20">
+        <div className="p-6 border-b border-[#222222]">
+          <Link to="/" className="text-lg font-display text-white font-bold tracking-widest flex flex-col">
+            <span>CRAFT CREATOR'S</span>
+            <span className="text-[9px] text-accent tracking-[0.2em] font-body uppercase mt-1">Framing Admin</span>
           </Link>
         </div>
 
-        <nav className="flex-1 py-6 space-y-1 overflow-y-auto">
-          <Link to="/admin" className="admin-nav-link text-white">
-            <Settings size={18} /> Dashboard
-          </Link>
-          <div className="px-4 py-3 mt-4 text-xs font-medium uppercase tracking-widest text-gray-500">
-            Portfolio & Prints
-          </div>
-          <Link to="/admin/photos" className="admin-nav-link">
-            <ImageIcon size={18} /> Photos
-          </Link>
-          <Link to="/admin/collections" className="admin-nav-link">
-            <Folder size={18} /> Collections
-          </Link>
-          <Link to="/admin/config" className="admin-nav-link">
-            <Sliders size={18} /> Configurator
-          </Link>
-          <div className="px-4 py-3 mt-4 text-xs font-medium uppercase tracking-widest text-gray-500">
-            Services & Bookings
-          </div>
-          <Link to="/admin/services" className="admin-nav-link">
-            <Briefcase size={18} /> Services
-          </Link>
-          <Link to="/admin/bookings" className="admin-nav-link">
-            <Calendar size={18} /> Bookings
-          </Link>
-          <Link to="/admin/client-galleries" className="admin-nav-link">
-            <Users size={18} /> Client Galleries
-          </Link>
+        <nav className="flex-1 py-6 space-y-1 overflow-y-auto px-3">
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive = location.pathname === link.path;
+            return (
+              <Link 
+                key={link.name} 
+                to={link.path} 
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-accent text-primary font-bold shadow-luxury' 
+                    : 'text-gray-400 hover:bg-[#1f1f1f] hover:text-white'
+                }`}
+              >
+                <Icon size={18} />
+                {link.name}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="p-4 border-t border-[#2a2a2a]">
+        <div className="p-4 border-t border-[#222222]">
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 text-sm font-body font-medium text-gray-400 hover:text-red-400 transition-colors w-full rounded-lg"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-body font-medium text-gray-400 hover:text-red-400 hover:bg-[#1a1313] transition-all duration-300 w-full rounded-lg"
           >
             <LogOut size={18} /> Logout
           </button>
@@ -60,8 +76,10 @@ const AdminLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 p-8">
-        <Outlet />
+      <main className="flex-1 ml-64 min-h-screen bg-[#0a0a0a]">
+        <div className="p-8 max-w-7xl mx-auto">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
